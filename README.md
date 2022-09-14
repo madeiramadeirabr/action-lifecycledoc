@@ -1,69 +1,42 @@
-# <Nome do projeto>
+# Lifecycledoc
 
-### Descrição
+## Descrição 
 
-### Contexto de negócio
+Utilitário para exportar a definição do lifecycledoc versionada no projeto como páginadas do Confluence.
 
-### Squad
+## Contexto de negócio
 
-### Requisitos (Se aplicavel)
+Sistemas que contém a documentação de eventos disparados e consumidos versionados juntos com o projeto.
 
-### Configurações para uso (Se aplicavel)
+## Squad Owner
 
-### Exemplos de uso (Se aplicavel)
+partnertools
 
-### Exit codes (Status Code, Result)
+## Get started
 
-### Monitoria e Logs (Caso seja aplicação - obrigatório)
-<!-- Descrição simples da regras de negócio que estão sendo logadas -->
-<!-- Descrição das monitorias + link para elas -->
-### Alertas (Caso seja aplicação - obrigatório)
-<!-- Descrição de quando deve ser alertado -->
-<!-- Listagem de todos os alertas configurados -->
-<!-- Canais que são notificados os alertas -->
+Para rodar o script você precisa configurar suas credenciais do confluence em `~/.lifecycledoc/config.yaml`. Com a seguinte estrutura:
 
-### Checklist de Engenharia
+```
+confluence_api_key: <TOKEN>
+confluence_email: <SEU EMAIL>
+confluence_host: https://madeiramadeira.atlassian.net
+```
 
-*Arquitetura*
+Para roda o script segue o exemplo a baixo:
+```
+.lifecycledoc <path do openapi>
+```
 
-- [ ] A aplicação nasceu com base em uma arquitetura de referência?
-- [ ] A aplicação possui CI/CD seguindo as práticas descritas no seguinte documento [CI/CD ](https://madeiramadeira.atlassian.net/wiki/spaces/SRE/pages/2560131648)
-- [ ] O banco de dados que a aplicação utiliza, é consumido apenas por essa aplicação?
-- [ ] A chamadas síncronas que faço em outros serviços, utiliza o padrão Retry? [Padrão Retry](https://docs.microsoft.com/pt-br/azure/architecture/patterns/retry)
-- [ ] As APIs são versionadas e toda mudança de contrato gera mudança na versão?
-- [ ] Possui HealthChecks para validar todas as dependências externas? <!-- add documentação de explicação -->
-- [ ] Seguem as práticas dos 12 fatores? <!-- add link para explicação -->
-- [ ] Os eventos seguem as práticas descritas no documento ? [Eventos na MadeiraMadeira](https://madeiramadeira.atlassian.net/wiki/spaces/CAR/pages/2141291341)
-- [ ] As comunicações assíncronas entre serviços, ocorre via evento?
-- [ ] É publicado seguindo o fluxo de Gestão de Mudanças (GMUD)?
+## Exit codes
 
-*Observabilidade*
-- [ ] Os logs seguem o padrão RFC da MadeiraMadeira ? [RFC Logs MadeiraMadeira](https://madeiramadeira.atlassian.net/wiki/spaces/CAR/pages/2317942893)
-- [ ] Os logs da aplicação são escritos no stdout e são enviados para New Relic ? 
-- [ ] As aplicações estão com monitoramento ativo na New Relic ?
+* `0` - Sucesso
+* `> 0` - Error
 
-*Infraestrutura*
-- [ ] A infraestrutura está automatizada com Terraform ?
-- [ ] A comunicação entre as aplicações ocorre apenas entre mesmo ambiente ?
+## Padrão de branchs
 
+* Feature - feature/xxxxx
+* Bugfix - bugfix/xxxxx
 
-*Segurança*
-- [ ] As chaves secretas que a aplicação utiliza são consumidas apenas via Secret Manager ?
-- [ ] Os parâmetros de ambiente estão configurados usando o Parameter Store ?
-- [ ] A exposição é feita pelo Kong ? **quando necessário expor**
-    
-*Testes*
-- [ ] Documentação (histórias,épicos e etc) disponíveis e devidamente detalhados (utilizando o formato BDD - Behavior driven development ou User Story) ?
-- [ ] Documentação (histórias, épicos e etc) apresentam impacto na jornada ?
-- [ ] Todos os itens (épicos,histórias, tarefas e etc) possuem regras e critérios de aceite ?
-- [ ] Todos os itens (épicos,histórias, tarefas e etc) apresentam o registro de execução de testes unitários apresentados nas tarefas ?
-- [ ] Todos os itens (épicos,histórias, tarefas e etc) apresentam o registro de execução de testes de integração e/ou caminho feliz, apresentados nas tarefas ?
-- [ ] As aplicações possuem teste unitário ?
-- [ ] As APIs possuem teste de contrato?  
-- [ ] As aplicações estão usando mocks ?
-    
-*Processo*
-- [ ] Está usando as práticas de source control ? [Source Control](https://madeiramadeira.atlassian.net/wiki/spaces/SRE/pages/2482995227)
-- [ ] O repositório de código está configurado de forma a promover práticas inner source ? 
-- [ ] As histórias do time usam formato de BDD ou user story ?
-- [ ] Os épicos do time apresentam o problema pro time quebrar em ações (histórias) ?
+## Padrão de commmits
+
+Resuma de forma sucinta o que foi adicionado, removido ou refatorado
