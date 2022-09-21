@@ -195,14 +195,20 @@ func parseScalarType[T scalar](
 		rawValue = nil
 	}
 
+	enumValues, err := parserScalarEnum[T](path, nullable, typeDefinition)
+	if err != nil {
+		return nil, err
+	}
+
+	format, _ := typeDefinition["format"].(string)
+
 	scalarType, err := types.NewScalar(
 		name,
 		path,
 		description,
 		nullable,
-		// @todo
-		"",
-		nil,
+		format,
+		enumValues,
 		rawValue,
 	)
 
@@ -224,6 +230,23 @@ func parserScalarValue[T scalar](path string, nullable bool, typeDefinition map[
 	}
 
 	return &value, nil
+}
+
+func parserScalarEnum[T scalar](path string, nullable bool, typeDefinition map[string]interface{}) ([]interface{}, error) {
+	enumValues, _ := typeDefinition["enum"].([]interface{})
+
+	for i := range enumValues {
+		if nullable && enumValues[i] == nil {
+			continue
+		}
+
+		_, is := enumValues[i].(T)
+		if !is {
+			return nil, fmt.Errorf("%s/enum: invalid enum type at %d position", path, i)
+		}
+	}
+
+	return enumValues, nil
 }
 
 type scalar interface {

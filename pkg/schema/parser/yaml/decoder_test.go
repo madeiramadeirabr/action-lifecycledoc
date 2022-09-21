@@ -30,7 +30,7 @@ types:
   FloatType:
     description: Um float
     type: number
-    format: float com 14 casas decimais
+    format: /\d+.\d{14}/
     value: 22.12345678901234
 
   StringType:
@@ -72,25 +72,33 @@ types:
 			expectedTypeKeyword: types.ScalarType,
 			expectedDescription: "Uma boolean",
 			expectedNullable:    true,
-			typeAssertions:      newScalarValueAssertion(t, nil),
+			typeAssertions:      newScalarAssertion(t, "", nil, nil),
 		},
 		"#/types/IntType": {
 			expectedTypeKeyword: types.ScalarType,
 			expectedDescription: "Um int",
 			expectedNullable:    false,
-			typeAssertions:      newScalarValueAssertion(t, 10),
+			typeAssertions:      newScalarAssertion(t, "", nil, 10),
 		},
 		"#/types/FloatType": {
 			expectedTypeKeyword: types.ScalarType,
 			expectedDescription: "Um float",
 			expectedNullable:    false,
-			typeAssertions:      newScalarValueAssertion(t, 22.12345678901234),
+			typeAssertions:      newScalarAssertion(t, `/\d+.\d{14}/`, nil, 22.12345678901234),
 		},
 		"#/types/StringType": {
 			expectedTypeKeyword: types.ScalarType,
 			expectedDescription: "Uma string",
 			expectedNullable:    false,
-			typeAssertions:      newScalarValueAssertion(t, "option1"),
+			typeAssertions: newScalarAssertion(
+				t,
+				"",
+				[]interface{}{
+					"option1",
+					"option2",
+				},
+				"option1",
+			),
 		},
 		"#/types/ArrayType": {
 			expectedTypeKeyword: types.ArrayType,
@@ -103,7 +111,7 @@ types:
 					return
 				}
 
-				assertScalarType(t, "Sou uma string", arrayType.Items())
+				assertScalarType(t, "", nil, "Sou uma string", arrayType.Items())
 			},
 		},
 		"#/types/ObjectType": {
@@ -131,13 +139,13 @@ types:
 							expectedTypeKeyword: types.ScalarType,
 							expectedDescription: "",
 							expectedNullable:    false,
-							typeAssertions:      newScalarValueAssertion(t, 10),
+							typeAssertions:      newScalarAssertion(t, "", nil, 10),
 						},
 						"name": {
 							expectedTypeKeyword: types.ScalarType,
 							expectedDescription: "O nome do object",
 							expectedNullable:    true,
-							typeAssertions:      newScalarValueAssertion(t, nil),
+							typeAssertions:      newScalarAssertion(t, "", nil, nil),
 						},
 					},
 				)
@@ -174,17 +182,24 @@ func assertTypeCasting[T *types.Scalar | *types.Array | *types.Object](t *testin
 	return result, nil
 }
 
-func newScalarValueAssertion(t *testing.T, expectedValue interface{}) func(*testing.T, types.TypeDescriber) {
+func newScalarAssertion(
+	t *testing.T,
+	expectedFormat string,
+	expectedEnum []interface{},
+	expectedValue interface{},
+) func(*testing.T, types.TypeDescriber) {
 	t.Helper()
 
 	return func(t *testing.T, typeDef types.TypeDescriber) {
 		t.Helper()
-		assertScalarType(t, expectedValue, typeDef)
+		assertScalarType(t, expectedFormat, expectedEnum, expectedValue, typeDef)
 	}
 }
 
 func assertScalarType(
 	t *testing.T,
+	expectedFormat string,
+	expectedEnum []interface{},
 	expectedValue interface{},
 	typeDef types.TypeDescriber,
 ) {
@@ -192,6 +207,14 @@ func assertScalarType(
 	if err != nil {
 		t.Error(err)
 		return
+	}
+
+	if format := scalar.Format(); format != expectedFormat {
+		t.Errorf("expected '%s' format, received '%s'", expectedFormat, format)
+	}
+
+	if enum := scalar.Enum(); !reflect.DeepEqual(enum, expectedEnum) {
+		t.Errorf("expected '%v' enum, received '%v'", expectedEnum, enum)
 	}
 
 	if value := scalar.Value(); !reflect.DeepEqual(value, expectedValue) {
