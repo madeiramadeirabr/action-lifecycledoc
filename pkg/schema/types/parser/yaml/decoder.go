@@ -109,6 +109,28 @@ func (d *decoder) parseTypeDefinition(
 		return parseScalarType[string](name, path, description, nullable, typeDefinition)
 	case "boolean":
 		return parseScalarType[bool](name, path, description, nullable, typeDefinition)
+	case "array":
+		rawItems, is := typeDefinition["items"].(yaml.MapSlice)
+		if !is {
+			return nil, fmt.Errorf("%s: unexpected structure", path)
+		}
+
+		itemsType, err := d.parseTypeDefinition(
+			"items",
+			fmt.Sprintf("%s/items", path),
+			d.yamlMapSliceToMap(rawItems),
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		return types.NewArray(
+			name,
+			path,
+			description,
+			nullable,
+			itemsType,
+		)
 	default:
 		// @todo:
 		return nil, fmt.Errorf("%s/type: '%s' not supported", path, typeKeyword)

@@ -37,7 +37,14 @@ types:
     enum:
       - option1
       - option2
-    value: option1`)
+    value: option1
+
+  ArrayType:
+    type: array
+    description: Um array de strings!
+    items:
+      type: string
+      value: Sou uma string`)
 
 	schemaSpy := newSchameStorageSpy()
 
@@ -50,6 +57,7 @@ types:
 		"#/types/IntType",
 		"#/types/FloatType",
 		"#/types/StringType",
+		"#/types/ArrayType",
 	}
 
 	for _, path := range typePathsToAssert {
