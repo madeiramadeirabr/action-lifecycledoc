@@ -173,6 +173,14 @@ func parseScalarType[T scalar](
 		return nil, err
 	}
 
+	var rawValue interface{}
+	if value != nil {
+		// Use value if insted of pointer
+		rawValue = *value
+	} else {
+		rawValue = nil
+	}
+
 	scalarType, err := types.NewScalar(
 		name,
 		path,
@@ -181,7 +189,7 @@ func parseScalarType[T scalar](
 		// @todo
 		"",
 		nil,
-		value,
+		rawValue,
 	)
 
 	if err != nil {
