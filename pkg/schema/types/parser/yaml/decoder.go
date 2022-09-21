@@ -98,7 +98,7 @@ func (d *decoder) parseTypeDefinition(
 	if isReference {
 		referenceType, err := types.NewReference(name, path, description, nullable, reference)
 		if err != nil {
-			err = fmt.Errorf("%s: %w", path, err)
+			err = addPathToErr(path, err)
 		}
 
 		return referenceType, err
@@ -133,13 +133,18 @@ func (d *decoder) parseTypeDefinition(
 			return nil, err
 		}
 
-		return types.NewArray(
+		arrayType, err := types.NewArray(
 			name,
 			path,
 			description,
 			nullable,
 			itemsType,
 		)
+		if err != nil {
+			return nil, addPathToErr(path, err)
+		}
+
+		return arrayType, nil
 	case "object":
 		rawProperties, err := d.extractYamlMapSliceFromMap(path, "properties", typeDefinition)
 		if err != nil {
@@ -151,16 +156,25 @@ func (d *decoder) parseTypeDefinition(
 			return nil, err
 		}
 
-		return types.NewObject(
+		objectType, err := types.NewObject(
 			name,
 			path,
 			description,
 			nullable,
 			typeDefinitions,
 		)
+		if err != nil {
+			return nil, addPathToErr(path, err)
+		}
+
+		return objectType, nil
 	default:
 		return nil, fmt.Errorf("%s/type: '%s' not supported", path, typeKeyword)
 	}
+}
+
+func addPathToErr(path string, err error) error {
+	return fmt.Errorf("%s: %w", path, err)
 }
 
 func parseScalarType[T scalar](
@@ -193,7 +207,7 @@ func parseScalarType[T scalar](
 	)
 
 	if err != nil {
-		return nil, fmt.Errorf("%s: %w", path, err)
+		return nil, addPathToErr(path, err)
 	}
 
 	return scalarType, nil

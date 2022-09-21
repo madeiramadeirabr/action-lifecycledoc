@@ -90,7 +90,7 @@ types:
 			expectedTypeKeyword: types.ScalarType,
 			expectedDescription: "Uma string",
 			expectedNullable:    false,
-			typeAssertions:      newScalarValueAssertion(t, "option10"),
+			typeAssertions:      newScalarValueAssertion(t, "option1"),
 		},
 		"#/types/ArrayType": {
 			expectedTypeKeyword: types.ArrayType,
@@ -212,6 +212,7 @@ func assertTypes(t *testing.T, types map[string]types.TypeDescriber, testCases m
 			typeDef, exists := types[path]
 			if !exists {
 				t.Errorf("expected type added with '%s' path, no types have been added", path)
+				return
 			}
 
 			assertType(
