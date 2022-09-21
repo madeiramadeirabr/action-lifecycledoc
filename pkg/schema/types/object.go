@@ -18,7 +18,7 @@ func (o *Object) Properties() []TypeDescriber {
 	return o.properties
 }
 
-func (*Object) NewObject(
+func NewObject(
 	name, path, description string,
 	nullable bool,
 	properties []TypeDescriber,
