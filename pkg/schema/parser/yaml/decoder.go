@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/madeiramadeirabr/action-lifecycledoc/pkg/schema/parser"
 	"github.com/madeiramadeirabr/action-lifecycledoc/pkg/schema/types"
-	"github.com/madeiramadeirabr/action-lifecycledoc/pkg/schema/types/parser"
 	"gopkg.in/yaml.v2"
 )
 

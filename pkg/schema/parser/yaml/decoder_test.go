@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/madeiramadeirabr/action-lifecycledoc/pkg/schema/parser/yaml"
 	"github.com/madeiramadeirabr/action-lifecycledoc/pkg/schema/types"
-	"github.com/madeiramadeirabr/action-lifecycledoc/pkg/schema/types/parser/yaml"
 )
 
 func TestShouldParserValidYamlDefinition(t *testing.T) {
