@@ -44,7 +44,7 @@ func (d *decoder) parseTypeDefinitions(path string, rawTypes yaml.MapSlice) ([]t
 		name := fmt.Sprint(rawTypes[i].Key)
 		path := fmt.Sprintf("%s/%s", path, name)
 
-		rawTypeDefinition, err := d.extractMapSliceFromMapItemValue(path, rawTypes[i].Value)
+		rawTypeDefinition, err := d.yamlMapItemValueToMap(path, rawTypes[i].Value)
 		if err != nil {
 			return nil, err
 		}
@@ -60,13 +60,22 @@ func (d *decoder) parseTypeDefinitions(path string, rawTypes yaml.MapSlice) ([]t
 	return typeDefinitions, nil
 }
 
-func (d *decoder) extractMapSliceFromMapItemValue(path string, value interface{}) (map[string]interface{}, error) {
+func (d *decoder) yamlMapItemValueToMap(path string, value interface{}) (map[string]interface{}, error) {
 	mapSlice, is := value.(yaml.MapSlice)
 	if !is {
 		return nil, fmt.Errorf("%s: unexpected structure", path)
 	}
 
 	return d.yamlMapSliceToMap(mapSlice), nil
+}
+
+func (d *decoder) extractYamlMapSliceFromMap(path, key string, m map[string]interface{}) (yaml.MapSlice, error) {
+	mapSlice, is := m[key].(yaml.MapSlice)
+	if !is {
+		return nil, fmt.Errorf("%s: unexpected structure", path)
+	}
+
+	return mapSlice, nil
 }
 
 func (*decoder) yamlMapSliceToMap(mapSlice yaml.MapSlice) map[string]interface{} {
@@ -110,9 +119,9 @@ func (d *decoder) parseTypeDefinition(
 	case "boolean":
 		return parseScalarType[bool](name, path, description, nullable, typeDefinition)
 	case "array":
-		rawItems, is := typeDefinition["items"].(yaml.MapSlice)
-		if !is {
-			return nil, fmt.Errorf("%s: unexpected structure", path)
+		rawItems, err := d.extractYamlMapSliceFromMap(path, "items", typeDefinition)
+		if err != nil {
+			return nil, err
 		}
 
 		itemsType, err := d.parseTypeDefinition(
@@ -131,8 +140,25 @@ func (d *decoder) parseTypeDefinition(
 			nullable,
 			itemsType,
 		)
+	case "object":
+		rawProperties, err := d.extractYamlMapSliceFromMap(path, "properties", typeDefinition)
+		if err != nil {
+			return nil, err
+		}
+
+		typeDefinitions, err := d.parseTypeDefinitions(fmt.Sprintf("%s/properties", path), rawProperties)
+		if err != nil {
+			return nil, err
+		}
+
+		return types.NewObject(
+			name,
+			path,
+			description,
+			nullable,
+			typeDefinitions,
+		)
 	default:
-		// @todo:
 		return nil, fmt.Errorf("%s/type: '%s' not supported", path, typeKeyword)
 	}
 }

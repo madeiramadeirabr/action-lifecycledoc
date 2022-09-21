@@ -44,7 +44,20 @@ types:
     description: Um array de strings!
     items:
       type: string
-      value: Sou uma string`)
+      value: Sou uma string
+
+  ObjectType:
+    type: object
+    nullable: false # redundant, the default is false
+    properties:
+      id:
+        type: integer
+        value: 10
+      name:
+        type: string
+        nullable: true
+        description: O nome do object
+        value: null`)
 
 	schemaSpy := newSchameStorageSpy()
 
@@ -58,6 +71,7 @@ types:
 		"#/types/FloatType",
 		"#/types/StringType",
 		"#/types/ArrayType",
+		"#/types/ObjectType",
 	}
 
 	for _, path := range typePathsToAssert {
