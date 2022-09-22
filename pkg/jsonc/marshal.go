@@ -13,6 +13,14 @@ type CommentRetriver interface {
 	GetValue() interface{}
 }
 
+type MapItem struct {
+	Key   string
+	Value interface{}
+}
+
+// MapSlice encodes map to JSON preserving the order of keys
+type MapSlice []MapItem
+
 type FormattedEncoder struct {
 	writer io.Writer
 }
@@ -63,11 +71,6 @@ func (f *FormattedEncoder) writeValue(v interface{}, level int, addComma bool) e
 				err = f.writef(" // %s", t.GetComment())
 			}
 		case map[string]interface{}:
-			err = f.write("{")
-			if err != nil {
-				break
-			}
-
 			// Sort keys in asc
 			var keys []string
 			for k := range t {
@@ -75,20 +78,35 @@ func (f *FormattedEncoder) writeValue(v interface{}, level int, addComma bool) e
 			}
 			sort.Strings(keys)
 
-			lastIndex := len(keys) - 1
+			mapSlice := make(MapSlice, len(keys))
+			for i := range keys {
+				mapSlice[i] = MapItem{
+					Key:   keys[i],
+					Value: t[keys[i]],
+				}
+			}
 
-			for index, key := range keys {
+			err = f.writeValue(mapSlice, level, addComma)
+		case MapSlice:
+			err = f.write("{")
+			if err != nil {
+				break
+			}
+
+			lastIndex := len(t) - 1
+
+			for index := range t {
 				err = f.writeNewLine(level)
 				if err != nil {
 					break
 				}
 
-				err = f.writef(`"%s": `, key)
+				err = f.writef(`"%s": `, t[index].Key)
 				if err != nil {
 					break
 				}
 
-				err = f.writeValue(t[key], level+1, index < lastIndex)
+				err = f.writeValue(t[index].Value, level+1, index < lastIndex)
 				if err != nil {
 					break
 				}

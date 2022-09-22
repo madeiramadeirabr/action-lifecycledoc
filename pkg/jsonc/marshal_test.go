@@ -70,6 +70,31 @@ func TestEncodeMapValues(t *testing.T) {
 	assertEncode(t, false, input, expected)
 }
 
+func TestEncodeMapSlice(t *testing.T) {
+	input := jsonc.MapSlice{
+		jsonc.MapItem{
+			Key:   "Z",
+			Value: 10,
+		},
+		jsonc.MapItem{
+			Key:   "A",
+			Value: "Yes!",
+		},
+		jsonc.MapItem{
+			Key:   "0",
+			Value: false,
+		},
+	}
+
+	expected := `{
+	"Z": 10,
+	"A": "Yes!",
+	"0": false
+}`
+
+	assertEncode(t, false, input, expected)
+}
+
 func TestEncodeArrayValues(t *testing.T) {
 	input := map[string]interface{}{
 		"array": []interface{}{
