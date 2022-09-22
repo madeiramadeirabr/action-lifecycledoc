@@ -123,42 +123,42 @@ func TestEncodeCommentableValues(t *testing.T) {
 	}{
 		{
 			name: "should add comment to int",
-			input: &commenterRetriverStub{
-				comment: "This is a int",
-				val:     67,
-			},
+			input: jsonc.NewCommentValue(
+				"This is a int",
+				67,
+			),
 			expectedWithComment: "67 // This is a int",
 		},
 		{
 			name: "should add comment to string",
-			input: &commenterRetriverStub{
-				comment: "This is a string",
-				val:     "yes!, comments",
-			},
+			input: jsonc.NewCommentValue(
+				"This is a string",
+				"yes!, comments",
+			),
 			expectedWithComment: `"yes!, comments" // This is a string`,
 		},
 		{
 			name: "should add comment to map",
 			input: map[string]interface{}{
-				"key1": &commenterRetriverStub{
-					comment: "Comment in key1!",
-					val:     867.123,
-				},
-				"key2": &commenterRetriverStub{
-					comment: "Its' hard to overstat my satisfaction",
-					val: map[string]interface{}{
+				"key1": jsonc.NewCommentValue(
+					"Comment in key1!",
+					867.123,
+				),
+				"key2": jsonc.NewCommentValue(
+					"Its' hard to overstat my satisfaction",
+					map[string]interface{}{
 						"hasComment": false,
-						"triumph": &commenterRetriverStub{
-							comment: "Huge Success",
-							val:     "I'm making a note here",
-						},
+						"triumph": jsonc.NewCommentValue(
+							"Huge Success",
+							"I'm making a note here",
+						),
 					},
-				},
+				),
 				"key3": "Simple string",
-				"key4": &commenterRetriverStub{
-					comment: "We do what we must, because we can",
-					val:     true,
-				},
+				"key4": jsonc.NewCommentValue(
+					"We do what we must, because we can",
+					true,
+				),
 			},
 			expectedWithComment: `{
 	"key1": 867.123, // Comment in key1!
@@ -177,19 +177,6 @@ func TestEncodeCommentableValues(t *testing.T) {
 			assertEncode(t, true, testCase.input, testCase.expectedWithComment)
 		})
 	}
-}
-
-type commenterRetriverStub struct {
-	val     interface{}
-	comment string
-}
-
-func (t *commenterRetriverStub) GetComment() string {
-	return t.comment
-}
-
-func (t *commenterRetriverStub) GetValue() interface{} {
-	return t.val
 }
 
 func assertCanEncode(t *testing.T, writer io.Writer, withComments bool, input interface{}) {
