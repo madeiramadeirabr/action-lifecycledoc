@@ -21,6 +21,10 @@ func (d *decoder) Decode(definition io.Reader, schema parser.SchemaStorager) err
 		return fmt.Errorf("can't decode yaml definition: %w", err)
 	}
 
+	if project.Version != "1.0" {
+		return fmt.Errorf("unsupported '%s' version", project.Version)
+	}
+
 	if err := d.parseTypes(project, schema); err != nil {
 		return err
 	}
