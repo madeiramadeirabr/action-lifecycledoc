@@ -57,7 +57,7 @@ func (d *decoder) parseConfluence(project *project, schema parser.SchemaStorager
 		)
 
 		if err != nil {
-			return addPathToErr("#/confluence/pages", fmt.Errorf("can't add page at '%d' index: %w", i, err))
+			return addPathToError("#/confluence/pages", fmt.Errorf("can't add page at '%d' index: %w", i, err))
 		}
 	}
 
@@ -115,7 +115,7 @@ func (d *decoder) parsePublishedEvents(project *project, schema parser.SchemaSto
 			entitiesType,
 		)
 		if err != nil {
-			return addPathToErr(path, err)
+			return addPathToError(path, err)
 		}
 
 		if err := schema.AddPublishedEvent(event); err != nil {
@@ -139,7 +139,7 @@ func (d *decoder) parseConsumedEvents(project *project, schema parser.SchemaStor
 
 		event, err := types.NewConsumedEvent(name, description)
 		if err != nil {
-			return addPathToErr(path, err)
+			return addPathToError(path, err)
 		}
 
 		if err := schema.AddConsumedEvent(event); err != nil {
@@ -155,7 +155,7 @@ func (d *decoder) parseEventVisibility(path string, eventDefinition map[string]i
 
 	v, err := types.NewEventVisibility(visibility)
 	if err != nil {
-		err = addPathToErr(path, err)
+		err = addPathToError(path, err)
 	}
 
 	return v, err
@@ -244,7 +244,7 @@ func (d *decoder) parseTypeDefinition(
 	if isReference {
 		referenceType, err := types.NewReference(name, path, description, nullable, reference)
 		if err != nil {
-			err = addPathToErr(path, err)
+			err = addPathToError(path, err)
 		}
 
 		return referenceType, err
@@ -287,7 +287,7 @@ func (d *decoder) parseTypeDefinition(
 			itemsType,
 		)
 		if err != nil {
-			return nil, addPathToErr(path, err)
+			return nil, addPathToError(path, err)
 		}
 
 		return arrayType, nil
@@ -310,7 +310,7 @@ func (d *decoder) parseTypeDefinition(
 			typeDefinitions,
 		)
 		if err != nil {
-			return nil, addPathToErr(path, err)
+			return nil, addPathToError(path, err)
 		}
 
 		return objectType, nil
@@ -319,7 +319,7 @@ func (d *decoder) parseTypeDefinition(
 	}
 }
 
-func addPathToErr(path string, err error) error {
+func addPathToError(path string, err error) error {
 	return fmt.Errorf("%s: %w", path, err)
 }
 
@@ -359,7 +359,7 @@ func parseScalarType[T scalar](
 	)
 
 	if err != nil {
-		return nil, addPathToErr(path, err)
+		return nil, addPathToError(path, err)
 	}
 
 	return scalarType, nil
