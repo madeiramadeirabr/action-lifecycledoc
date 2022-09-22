@@ -107,9 +107,24 @@ func (b *BasicResolver) AddPublishedEvent(e *types.PublishedEvent) error {
 		return fmt.Errorf("published event '%s' has been duplicated", e.Name())
 	}
 
+	b.hasResolved = false
+
 	b.publishedEvents[e.Name()] = e
 	b.publishedEventsNames = append(b.publishedEventsNames, e.Name())
 	return nil
+}
+
+func (b *BasicResolver) GetPublishedEvents() ([]*types.PublishedEvent, error) {
+	if err := b.resolve(); err != nil {
+		return nil, err
+	}
+
+	result := make([]*types.PublishedEvent, len(b.publishedEventsNames))
+	for i := range b.publishedEventsNames {
+		result[i] = b.publishedEvents[b.publishedEventsNames[i]]
+	}
+
+	return result, nil
 }
 
 func (b *BasicResolver) AddConsumedEvent(e *types.ConsumedEvent) error {
@@ -159,6 +174,22 @@ func (b *BasicResolver) resolve() error {
 		}
 
 		b.types[path] = resolvedType
+	}
+
+	for name := range b.publishedEvents {
+		attributesType, err := b.getResolvedType(b.publishedEvents[name].Attributes())
+		if err != nil {
+			return err
+		}
+
+		b.publishedEvents[name].SetAttributes(attributesType)
+
+		entities, err := b.getResolvedType(b.publishedEvents[name].Entities())
+		if err != nil {
+			return err
+		}
+
+		b.publishedEvents[name].SetEntities(entities)
 	}
 
 	b.hasResolved = true
@@ -235,7 +266,7 @@ func (b *BasicResolver) resolveReferenceType(t types.TypeDescriber) (types.TypeD
 
 	targetType, exists := b.types[referenceType.Reference()]
 	if !exists {
-		return nil, fmt.Errorf("definition '%s' referenced in '%s' not found", referenceType.Reference(), referenceType.Path())
+		return nil, fmt.Errorf("definition '%s' referenced in '%s' not found in declared types", referenceType.Reference(), referenceType.Path())
 	}
 
 	targetType, err = b.getResolvedType(targetType)

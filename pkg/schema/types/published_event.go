@@ -32,8 +32,16 @@ func (p *PublishedEvent) Attributes() TypeDescriber {
 	return p.attributes
 }
 
+func (p *PublishedEvent) SetAttributes(attributes TypeDescriber) {
+	p.attributes = attributes
+}
+
 func (p *PublishedEvent) Entities() TypeDescriber {
 	return p.entities
+}
+
+func (p *PublishedEvent) SetEntities(entitites TypeDescriber) {
+	p.entities = entitites
 }
 
 func NewPublishdEvent(
