@@ -13,6 +13,10 @@ type CommentRetriver interface {
 	GetValue() interface{}
 }
 
+type Encoder interface {
+	Encode(v interface{}) error
+}
+
 type MapItem struct {
 	Key   string
 	Value interface{}
