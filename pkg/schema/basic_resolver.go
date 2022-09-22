@@ -95,6 +95,7 @@ func (b *BasicResolver) GetTypes() ([]types.TypeDescriber, error) {
 		return nil, err
 	}
 
+	// Always return in declaration order
 	result := make([]types.TypeDescriber, len(b.typePaths))
 	for i := range b.typePaths {
 		result[i] = b.types[b.typePaths[i]]
@@ -144,6 +145,19 @@ func (b *BasicResolver) AddConsumedEvent(e *types.ConsumedEvent) error {
 	b.consumedEvents[e.Name()] = e
 	b.consumedEventsNames = append(b.consumedEventsNames, e.Name())
 	return nil
+}
+
+func (b *BasicResolver) GetConsumedEvents() ([]*types.ConsumedEvent, error) {
+	if err := b.isValid(); err != nil {
+		return nil, err
+	}
+
+	result := make([]*types.ConsumedEvent, len(b.consumedEventsNames))
+	for i := range b.consumedEventsNames {
+		result[i] = b.consumedEvents[b.consumedEventsNames[i]]
+	}
+
+	return result, nil
 }
 
 func NewBasicResolver() *BasicResolver {
