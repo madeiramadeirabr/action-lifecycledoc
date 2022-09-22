@@ -7,11 +7,15 @@ import (
 )
 
 type SchemaStorager interface {
-	AddType(types.TypeDescriber) error
-	AddPublishedEvent(*types.PublishedEvent) error
-	AddConsumedEvent(*types.ConsumedEvent) error
+	SetProject(name string) error
+
+	AddConfluencePage(title, spaceKey, ancestorID string) error
+
+	AddType(t types.TypeDescriber) error
+	AddPublishedEvent(e *types.PublishedEvent) error
+	AddConsumedEvent(e *types.ConsumedEvent) error
 }
 
 type Decoder interface {
-	Decode(io.Reader, SchemaStorager) error
+	Decode(r io.Reader, s SchemaStorager) error
 }

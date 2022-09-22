@@ -15,6 +15,12 @@ func TestShouldParserValidYamlDefinition(t *testing.T) {
 version: "1.0"
 name: super-cool-service
 
+confluence:
+  pages:
+    - spaceKey: "SPACEKEY"
+      ancestorId: "123456789"
+      title: Titulo
+
 events:
   published:
     SOME_COOL_EVENT:
@@ -230,12 +236,59 @@ types:
 			t.Errorf("expected '%s' description, received '%s'", expected, event.Description())
 		}
 	})
+
+	t.Run("should add name and confluence pages", func(t *testing.T) {
+		expectedName := "super-cool-service"
+		if schemaSpy.name != expectedName {
+			t.Errorf("expected '%s' name, received '%s'", expectedName, schemaSpy.name)
+		}
+
+		if length := len(schemaSpy.confluencePages); length != 1 {
+			t.Fatalf("expected '1' confluence page, received '%d'", length)
+		}
+
+		var (
+			expectedSpaceKey   = "SPACEKEY"
+			expectedAncestorId = "123456789"
+			expectedTitle      = "Titulo"
+		)
+
+		if spaceKey := schemaSpy.confluencePages[0].SpaceKey(); spaceKey != expectedSpaceKey {
+			t.Errorf("expected '%s' space key, received '%s'", expectedSpaceKey, spaceKey)
+		}
+
+		if ancestorID := schemaSpy.confluencePages[0].AncestorID(); ancestorID != expectedAncestorId {
+			t.Errorf("expected '%s' ancestor id, received '%s'", expectedAncestorId, ancestorID)
+		}
+
+		if title := schemaSpy.confluencePages[0].Title(); title != expectedTitle {
+			t.Errorf("expected '%s' title, received '%s'", expectedTitle, title)
+		}
+	})
 }
 
 type schemaStoragerSpy struct {
+	name            string
+	confluencePages []*types.ConfluencePage
+
 	types           map[string]types.TypeDescriber
 	publishedEvents map[string]*types.PublishedEvent
 	consumedEvents  map[string]*types.ConsumedEvent
+}
+
+func (s *schemaStoragerSpy) SetProject(name string) error {
+	s.name = name
+	return nil
+}
+
+func (s *schemaStoragerSpy) AddConfluencePage(title, spaceKey, ancestorID string) error {
+	page, err := types.NewConfluencePage(title, spaceKey, ancestorID)
+	if err != nil {
+		return err
+	}
+
+	s.confluencePages = append(s.confluencePages, page)
+	return nil
 }
 
 func (s *schemaStoragerSpy) AddType(t types.TypeDescriber) error {

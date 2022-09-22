@@ -25,6 +25,14 @@ func (d *decoder) Decode(definition io.Reader, schema parser.SchemaStorager) err
 		return fmt.Errorf("unsupported '%s' version", project.Version)
 	}
 
+	if err := schema.SetProject(project.Name); err != nil {
+		return err
+	}
+
+	if err := d.parseConfluence(project, schema); err != nil {
+		return err
+	}
+
 	if err := d.parseTypes(project, schema); err != nil {
 		return err
 	}
@@ -35,6 +43,22 @@ func (d *decoder) Decode(definition io.Reader, schema parser.SchemaStorager) err
 
 	if err := d.parseConsumedEvents(project, schema); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (d *decoder) parseConfluence(project *project, schema parser.SchemaStorager) error {
+	for i := range project.Confluence.Pages {
+		err := schema.AddConfluencePage(
+			project.Confluence.Pages[i].Title,
+			project.Confluence.Pages[i].SpaceKey,
+			project.Confluence.Pages[i].AncestorID,
+		)
+
+		if err != nil {
+			return addPathToErr("#/confluence/pages", fmt.Errorf("can't add page at '%d' index: %w", i, err))
+		}
 	}
 
 	return nil
@@ -311,7 +335,7 @@ func parseScalarType[T scalar](
 
 	var rawValue interface{}
 	if value != nil {
-		// Use value if insted of pointer
+		// Use value insted of pointer
 		rawValue = *value
 	} else {
 		rawValue = nil
