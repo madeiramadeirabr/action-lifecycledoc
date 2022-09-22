@@ -298,6 +298,37 @@ func TestShouldRegisterEvent(t *testing.T) {
 	assertScalarValue(t, 10, properties["#/types/ObjectType/id"])
 }
 
+func TestShouldIdentifyRecursiveReference(t *testing.T) {
+	resolver := schema.NewBasicResolver()
+	resolver.SetProject("maça")
+
+	namesRefences := map[string]string{
+		"refTypeOne": "refTypeTwo",
+		"refTypeTwo": "refTypeOne",
+	}
+
+	for name, refence := range namesRefences {
+		refType, err := types.NewReference(
+			name,
+			fmt.Sprintf("#/types/%s", name),
+			"",
+			false,
+			fmt.Sprintf("#/types/%s", refence),
+		)
+		assertNoError(t, err)
+		assertNoError(t, resolver.AddType(refType))
+	}
+
+	typesResolved, err := resolver.GetTypes()
+	if err == nil {
+		t.Error("expected error, received nil")
+	}
+
+	if typesResolved != nil {
+		t.Errorf("expected nil types, received %#v", typesResolved)
+	}
+}
+
 func assertNoError(t *testing.T, err error) {
 	t.Helper()
 
