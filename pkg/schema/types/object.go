@@ -18,6 +18,10 @@ func (o *Object) Properties() []TypeDescriber {
 	return o.properties
 }
 
+func (o *Object) SetProperties(properties []TypeDescriber) {
+	o.properties = properties
+}
+
 func NewObject(
 	name, path, description string,
 	nullable bool,

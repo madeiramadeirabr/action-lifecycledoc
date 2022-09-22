@@ -16,6 +16,10 @@ func (a *Array) Items() TypeDescriber {
 	return a.items
 }
 
+func (a *Array) SetItems(items TypeDescriber) {
+	a.items = items
+}
+
 func NewArray(
 	name, path, description string,
 	nullable bool,
