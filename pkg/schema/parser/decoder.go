@@ -9,6 +9,7 @@ import (
 type SchemaStorager interface {
 	AddType(types.TypeDescriber) error
 	AddPublishedEvent(*types.PublishedEvent) error
+	AddConsumedEvent(*types.ConsumedEvent) error
 }
 
 type Decoder interface {

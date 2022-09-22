@@ -29,7 +29,9 @@ func (d *decoder) Decode(definition io.Reader, schema parser.SchemaStorager) err
 		return err
 	}
 
-	// @todo: parser consumed events
+	if err := d.parseConsumedEvents(project, schema); err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -58,7 +60,7 @@ func (d *decoder) parsePublishedEvents(project *project, schema parser.SchemaSto
 			return err
 		}
 
-		visibility, err := d.parserEventVisibility(path, rawEventDefinition)
+		visibility, err := d.parseEventVisibility(path, rawEventDefinition)
 		if err != nil {
 			return err
 		}
@@ -96,7 +98,31 @@ func (d *decoder) parsePublishedEvents(project *project, schema parser.SchemaSto
 	return nil
 }
 
-func (d *decoder) parserEventVisibility(path string, eventDefinition map[string]interface{}) (types.EventVisibility, error) {
+func (d *decoder) parseConsumedEvents(project *project, schema parser.SchemaStorager) error {
+	for i := range project.Events.Consumed {
+		name, path := d.yamlMapItemToNameAndPath("#/events/consumed", project.Events.Consumed[i])
+
+		rawEventDefinition, err := d.yamlMapItemValueToMap(path, project.Events.Consumed[i].Value)
+		if err != nil {
+			return err
+		}
+
+		description, _ := rawEventDefinition["description"].(string)
+
+		event, err := types.NewConsumedEvent(name, description)
+		if err != nil {
+			return addPathToErr(path, err)
+		}
+
+		if err := schema.AddConsumedEvent(event); err != nil {
+			return fmt.Errorf("can't register consumed event: %w", err)
+		}
+	}
+
+	return nil
+}
+
+func (d *decoder) parseEventVisibility(path string, eventDefinition map[string]interface{}) (types.EventVisibility, error) {
 	visibility, _ := eventDefinition["visibility"].(string)
 
 	v, err := types.NewEventVisibility(visibility)

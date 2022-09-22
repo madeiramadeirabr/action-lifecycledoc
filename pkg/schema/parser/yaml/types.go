@@ -14,4 +14,7 @@ type project struct {
 type events struct {
 	// Published is yaml.MapSlice to keep declaration order
 	Published yaml.MapSlice `yaml:"published"`
+
+	// Consumed is yaml.MapSlice to keep declaration order
+	Consumed yaml.MapSlice `yaml:"consumed"`
 }

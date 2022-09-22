@@ -40,6 +40,10 @@ events:
           id:
             $ref: '#/types/IntType'
 
+  consumed:
+    EXTERNAL_EVENT:
+      description: Usado para demonstração
+
 types:
   BoolType:
     description: Uma boolean
@@ -180,7 +184,7 @@ types:
 
 	assertTypes(t, schemaSpy.types, testCases)
 
-	t.Run("should register event", func(t *testing.T) {
+	t.Run("should register published event", func(t *testing.T) {
 		event, exists := schemaSpy.publishedEvents["SOME_COOL_EVENT"]
 		if !exists {
 			t.Fatal("expected event SOME_COOL_EVENT in published events")
@@ -214,11 +218,24 @@ types:
 			t.Errorf("expected '#/types/IntType' reference, received '%s'", refence)
 		}
 	})
+
+	t.Run("should register consumed event", func(t *testing.T) {
+		event, exists := schemaSpy.consumedEvents["EXTERNAL_EVENT"]
+		if !exists {
+			t.Fatal("expected event EXTERNAL_EVENT in consumed events")
+		}
+
+		expected := "Usado para demonstração"
+		if event.Description() != expected {
+			t.Errorf("expected '%s' description, received '%s'", expected, event.Description())
+		}
+	})
 }
 
 type schemaStoragerSpy struct {
 	types           map[string]types.TypeDescriber
 	publishedEvents map[string]*types.PublishedEvent
+	consumedEvents  map[string]*types.ConsumedEvent
 }
 
 func (s *schemaStoragerSpy) AddType(t types.TypeDescriber) error {
@@ -231,10 +248,16 @@ func (s *schemaStoragerSpy) AddPublishedEvent(e *types.PublishedEvent) error {
 	return nil
 }
 
+func (s *schemaStoragerSpy) AddConsumedEvent(e *types.ConsumedEvent) error {
+	s.consumedEvents[e.Name()] = e
+	return nil
+}
+
 func newSchameStorageSpy() *schemaStoragerSpy {
 	return &schemaStoragerSpy{
 		types:           make(map[string]types.TypeDescriber),
 		publishedEvents: make(map[string]*types.PublishedEvent),
+		consumedEvents:  make(map[string]*types.ConsumedEvent),
 	}
 }
 
