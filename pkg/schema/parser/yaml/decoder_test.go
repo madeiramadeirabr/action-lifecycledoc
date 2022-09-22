@@ -15,6 +15,31 @@ func TestShouldParserValidYamlDefinition(t *testing.T) {
 version: "1.0"
 name: super-cool-service
 
+events:
+  published:
+    SOME_COOL_EVENT:
+      visibility: public
+      module: test
+      description: Evento de teste
+
+      attributes:
+        type: object
+        properties:
+          id:
+            type: integer
+            value: 9932
+            description: ID do evento
+          description:
+            type: string
+            nullable: true
+            value: null
+      
+      entities:
+        type: object
+        properties:
+          id:
+            $ref: '#/types/IntType'
+
 types:
   BoolType:
     description: Uma boolean
@@ -154,10 +179,46 @@ types:
 	}
 
 	assertTypes(t, schemaSpy.types, testCases)
+
+	t.Run("should register event", func(t *testing.T) {
+		event, exists := schemaSpy.publishedEvents["SOME_COOL_EVENT"]
+		if !exists {
+			t.Fatal("expected event SOME_COOL_EVENT in published events")
+			return
+		}
+
+		if visibility := event.Visibility(); visibility != types.EventPublic {
+			t.Errorf("expected 'public' visibility, received '%s'", visibility)
+		}
+
+		attributes, err := assertTypeCasting[*types.Object](t, event.Attributes())
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if len(attributes.Properties()) != 2 {
+			t.Errorf("expected '2' properties, received '%d'", len(attributes.Properties()))
+		}
+
+		entities, err := assertTypeCasting[*types.Object](t, event.Entities())
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		refDefinition, err := assertTypeCasting[*types.Reference](t, entities.Properties()[0])
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if refence := refDefinition.Reference(); refence != "#/types/IntType" {
+			t.Errorf("expected '#/types/IntType' reference, received '%s'", refence)
+		}
+	})
 }
 
 type schemaStoragerSpy struct {
-	types map[string]types.TypeDescriber
+	types           map[string]types.TypeDescriber
+	publishedEvents map[string]*types.PublishedEvent
 }
 
 func (s *schemaStoragerSpy) AddType(t types.TypeDescriber) error {
@@ -165,13 +226,19 @@ func (s *schemaStoragerSpy) AddType(t types.TypeDescriber) error {
 	return nil
 }
 
+func (s *schemaStoragerSpy) AddPublishedEvent(e *types.PublishedEvent) error {
+	s.publishedEvents[e.Name()] = e
+	return nil
+}
+
 func newSchameStorageSpy() *schemaStoragerSpy {
 	return &schemaStoragerSpy{
-		types: make(map[string]types.TypeDescriber),
+		types:           make(map[string]types.TypeDescriber),
+		publishedEvents: make(map[string]*types.PublishedEvent),
 	}
 }
 
-func assertTypeCasting[T *types.Scalar | *types.Array | *types.Object](t *testing.T, typeDef types.TypeDescriber) (T, error) {
+func assertTypeCasting[T *types.Scalar | *types.Array | *types.Object | *types.Reference](t *testing.T, typeDef types.TypeDescriber) (T, error) {
 	t.Helper()
 
 	result, is := typeDef.(T)

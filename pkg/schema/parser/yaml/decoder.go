@@ -21,6 +21,20 @@ func (d *decoder) Decode(definition io.Reader, schema parser.SchemaStorager) err
 		return fmt.Errorf("can't decode yaml definition: %w", err)
 	}
 
+	if err := d.parseTypes(project, schema); err != nil {
+		return err
+	}
+
+	if err := d.parsePublishedEvents(project, schema); err != nil {
+		return err
+	}
+
+	// @todo: parser consumed events
+
+	return nil
+}
+
+func (d *decoder) parseTypes(project *project, schema parser.SchemaStorager) error {
 	types, err := d.parseTypeDefinitions("#/types", project.Types)
 	if err != nil {
 		return fmt.Errorf("can't parse types: %w", err)
@@ -32,17 +46,90 @@ func (d *decoder) Decode(definition io.Reader, schema parser.SchemaStorager) err
 		}
 	}
 
-	// @todo: parser consumed and published events
+	return nil
+}
+
+func (d *decoder) parsePublishedEvents(project *project, schema parser.SchemaStorager) error {
+	for i := range project.Events.Published {
+		name, path := d.yamlMapItemToNameAndPath("#/events/published", project.Events.Published[i])
+
+		rawEventDefinition, err := d.yamlMapItemValueToMap(path, project.Events.Published[i].Value)
+		if err != nil {
+			return err
+		}
+
+		visibility, err := d.parserEventVisibility(path, rawEventDefinition)
+		if err != nil {
+			return err
+		}
+
+		module, _ := rawEventDefinition["module"].(string)
+		description, _ := rawEventDefinition["description"].(string)
+
+		attributesType, err := d.parserEventTypeDefinition(path, "attributes", rawEventDefinition)
+		if err != nil {
+			return err
+		}
+
+		entitiesType, err := d.parserEventTypeDefinition(path, "entities", rawEventDefinition)
+		if err != nil {
+			return err
+		}
+
+		event, err := types.NewPublishdEvent(
+			name,
+			visibility,
+			module,
+			description,
+			attributesType,
+			entitiesType,
+		)
+		if err != nil {
+			return addPathToErr(path, err)
+		}
+
+		if err := schema.AddPublishedEvent(event); err != nil {
+			return fmt.Errorf("can't register published event: %w", err)
+		}
+	}
 
 	return nil
+}
+
+func (d *decoder) parserEventVisibility(path string, eventDefinition map[string]interface{}) (types.EventVisibility, error) {
+	visibility, _ := eventDefinition["visibility"].(string)
+
+	v, err := types.NewEventVisibility(visibility)
+	if err != nil {
+		err = addPathToErr(path, err)
+	}
+
+	return v, err
+}
+
+func (d *decoder) parserEventTypeDefinition(path, key string, rawEventDefinition map[string]interface{}) (types.TypeDescriber, error) {
+	rawType, err := d.extractYamlMapSliceFromMap(path, key, rawEventDefinition)
+	if err != nil {
+		return nil, err
+	}
+
+	typeDefinition, err := d.parseTypeDefinition(
+		key,
+		fmt.Sprintf("%s/%s", path, key),
+		d.yamlMapSliceToMap(rawType),
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return typeDefinition, nil
 }
 
 func (d *decoder) parseTypeDefinitions(path string, rawTypes yaml.MapSlice) ([]types.TypeDescriber, error) {
 	var typeDefinitions []types.TypeDescriber
 
 	for i := range rawTypes {
-		name := fmt.Sprint(rawTypes[i].Key)
-		path := fmt.Sprintf("%s/%s", path, name)
+		name, path := d.yamlMapItemToNameAndPath(path, rawTypes[i])
 
 		rawTypeDefinition, err := d.yamlMapItemValueToMap(path, rawTypes[i].Value)
 		if err != nil {
@@ -60,6 +147,11 @@ func (d *decoder) parseTypeDefinitions(path string, rawTypes yaml.MapSlice) ([]t
 	return typeDefinitions, nil
 }
 
+func (d *decoder) yamlMapItemToNameAndPath(path string, item yaml.MapItem) (string, string) {
+	name := fmt.Sprint(item.Key)
+	return name, fmt.Sprintf("%s/%s", path, name)
+}
+
 func (d *decoder) yamlMapItemValueToMap(path string, value interface{}) (map[string]interface{}, error) {
 	mapSlice, is := value.(yaml.MapSlice)
 	if !is {
@@ -72,7 +164,7 @@ func (d *decoder) yamlMapItemValueToMap(path string, value interface{}) (map[str
 func (d *decoder) extractYamlMapSliceFromMap(path, key string, m map[string]interface{}) (yaml.MapSlice, error) {
 	mapSlice, is := m[key].(yaml.MapSlice)
 	if !is {
-		return nil, fmt.Errorf("%s: unexpected structure", path)
+		return nil, fmt.Errorf("%s/%s: unexpected structure", path, key)
 	}
 
 	return mapSlice, nil
