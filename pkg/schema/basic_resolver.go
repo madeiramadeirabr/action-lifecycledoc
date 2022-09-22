@@ -26,7 +26,12 @@ type BasicResolver struct {
 	// hasResolved indicates that the types have been resolved
 	hasResolved bool
 
+	// resolvedTypes stored resolved types in all levels to prevent duplicate work
 	resolvedTypes map[string]types.TypeDescriber
+
+	// resolvingTypes stores the types being resolved to identify recursive references.
+	// we use maps for quick searches, the stored value doesn't matter
+	resolvingTypes map[string]bool
 }
 
 func (b *BasicResolver) SetProject(name string) error {
@@ -147,6 +152,7 @@ func NewBasicResolver() *BasicResolver {
 		publishedEvents: make(map[string]*types.PublishedEvent),
 		consumedEvents:  make(map[string]*types.ConsumedEvent),
 		resolvedTypes:   make(map[string]types.TypeDescriber),
+		resolvingTypes:  make(map[string]bool),
 	}
 }
 
@@ -269,10 +275,17 @@ func (b *BasicResolver) resolveReferenceType(t types.TypeDescriber) (types.TypeD
 		return nil, fmt.Errorf("definition '%s' referenced in '%s' not found in declared types", referenceType.Reference(), referenceType.Path())
 	}
 
+	if _, exists := b.resolvingTypes[referenceType.Path()]; exists {
+		return nil, fmt.Errorf("recursive reference dected for definition '%s'", referenceType.Path())
+	}
+	b.resolvingTypes[referenceType.Path()] = true
+
 	targetType, err = b.getResolvedType(targetType)
 	if err != nil {
 		return nil, fmt.Errorf("can't resolve '%s' reference: %w", referenceType.Path(), err)
 	}
+
+	delete(b.resolvingTypes, referenceType.Path())
 
 	// Recreate the type definition to override generic infomation
 	switch targetType.Type() {
