@@ -209,6 +209,95 @@ func TestShouldResolveTypeReferences(t *testing.T) {
 	assertScalarValue(t, stringType.Value(), arrayRefItemsType)
 }
 
+func TestShouldRegisterEvent(t *testing.T) {
+	resolver := schema.NewBasicResolver()
+	resolver.SetProject("test events")
+
+	intType, err := types.NewScalar(
+		"id",
+		"#/types/ObjectType/id",
+		"",
+		false,
+		"",
+		nil,
+		10,
+	)
+	assertNoError(t, err)
+
+	objectType, err := types.NewObject(
+		"ObjectType",
+		"#/types/ObjectType",
+		"",
+		false,
+		[]types.TypeDescriber{
+			intType,
+		},
+	)
+	assertNoError(t, err)
+	assertNoError(t, resolver.AddType(objectType))
+
+	refType, err := types.NewReference(
+		"object",
+		"#/events/published/SIMPLE_EVENT/properties/object",
+		"",
+		false,
+		objectType.Path(),
+	)
+	assertNoError(t, err)
+
+	stringType, err := types.NewScalar(
+		"id",
+		"#/events/published/SIMPLE_EVENT/entities/id",
+		"",
+		false,
+		"",
+		nil,
+		"banana",
+	)
+	assertNoError(t, err)
+
+	entitiesType, err := types.NewObject(
+		"ObjectType",
+		"#/events/published/SIMPLE_EVENT/entities",
+		"",
+		false,
+		[]types.TypeDescriber{
+			stringType,
+		},
+	)
+	assertNoError(t, err)
+
+	event, err := types.NewPublishdEvent(
+		"SIMPLE_EVENT",
+		types.EventPublic,
+		"",
+		"",
+		refType,
+		entitiesType,
+	)
+	assertNoError(t, err)
+
+	assertNoError(t, resolver.AddPublishedEvent(event))
+	events, err := resolver.GetPublishedEvents()
+	assertNoError(t, err)
+
+	if length := len(events); length != 1 {
+		t.Fatalf("expected '1' events, received '%d'", length)
+	}
+
+	assertTypeName(t, entitiesType.Name(), events[0].Entities())
+	assertTypePath(t, entitiesType.Path(), events[0].Entities())
+
+	assertTypeName(t, refType.Name(), events[0].Attributes())
+	assertTypePath(t, refType.Path(), events[0].Attributes())
+
+	attributesType := typeDefintionToRealType[*types.Object](t, events[0].Attributes())
+	properties := typeDescriberSliceToMap(attributesType.Properties())
+
+	assertTypeExistInMap(t, "#/types/ObjectType/id", properties)
+	assertScalarValue(t, 10, properties["#/types/ObjectType/id"])
+}
+
 func assertNoError(t *testing.T, err error) {
 	t.Helper()
 
