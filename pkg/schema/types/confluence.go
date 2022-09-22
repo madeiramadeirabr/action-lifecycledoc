@@ -3,11 +3,15 @@ package types
 import "errors"
 
 type Confluence struct {
-	pages []ConfluencePage
+	pages []*ConfluencePage
 }
 
-func (c *Confluence) Pages() []ConfluencePage {
+func (c *Confluence) Pages() []*ConfluencePage {
 	return c.pages
+}
+
+func (c *Confluence) AddPage(page *ConfluencePage) {
+	c.pages = append(c.pages, page)
 }
 
 // ConfluencePage represents a immutable confluence page
