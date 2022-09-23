@@ -2,6 +2,10 @@ package types
 
 import "errors"
 
+type ReferenceDescriber interface {
+	Reference() string
+}
+
 type Reference struct {
 	reference string
 

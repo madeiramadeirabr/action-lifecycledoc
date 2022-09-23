@@ -204,8 +204,8 @@ func TestShouldResolveTypeReferences(t *testing.T) {
 
 	assertTypeDescription(t, arrayRef.Description(), properties[arrayRef.Path()])
 
-	arrayRefType := typeDefintionToRealType[*types.Array](t, properties[arrayRef.Path()])
-	arrayRefItemsType := typeDefintionToRealType[*types.Scalar](t, arrayRefType.Items())
+	arrayRefType := typeDefintionToRealType[*types.ArrayReference](t, properties[arrayRef.Path()])
+	arrayRefItemsType := typeDefintionToRealType[*types.ScalarReference](t, arrayRefType.Items())
 
 	assertTypeName(t, refToString.Name(), arrayRefItemsType)
 	assertTypePath(t, refToString.Path(), arrayRefItemsType)
@@ -297,7 +297,7 @@ func TestShouldRegisterEvent(t *testing.T) {
 	assertTypeName(t, refType.Name(), events[0].Attributes())
 	assertTypePath(t, refType.Path(), events[0].Attributes())
 
-	attributesType := typeDefintionToRealType[*types.Object](t, events[0].Attributes())
+	attributesType := typeDefintionToRealType[*types.ObjectReference](t, events[0].Attributes())
 	properties := typeDescriberSliceToMap(attributesType.Properties())
 
 	assertTypeExistInMap(t, "#/types/ObjectType/id", properties)
@@ -397,7 +397,7 @@ func assertString(t *testing.T, expected, value string) {
 func assertScalarValue(t *testing.T, expected interface{}, typeDef types.TypeDescriber) {
 	t.Helper()
 
-	scalar, is := typeDef.(*types.Scalar)
+	scalar, is := typeDef.(types.ScalarDescriber)
 	if !is {
 		t.Fatalf("definition '%s' is not a scalar type", typeDef.Path())
 	}
@@ -407,12 +407,15 @@ func assertScalarValue(t *testing.T, expected interface{}, typeDef types.TypeDes
 	}
 }
 
-func typeDefintionToRealType[T *types.Scalar | *types.Array | *types.Object](t *testing.T, typeDef types.TypeDescriber) T {
+func typeDefintionToRealType[T *types.Scalar | *types.Array | *types.Object | *types.ScalarReference | *types.ArrayReference | *types.ObjectReference](
+	t *testing.T,
+	typeDef types.TypeDescriber,
+) T {
 	t.Helper()
 
 	result, is := typeDef.(T)
 	if !is {
-		t.Fatalf("definition '%s' expected type '%T', received '%T': %#v", typeDef.Path(), result, typeDef, typeDef)
+		t.Fatalf("definition '%s' expected type '%T', received '%T'", typeDef.Path(), result, typeDef)
 	}
 
 	return result

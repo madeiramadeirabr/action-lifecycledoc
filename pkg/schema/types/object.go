@@ -2,6 +2,13 @@ package types
 
 import "errors"
 
+type ObjectDescriber interface {
+	Properties() []TypeDescriber
+	SetProperties(properties []TypeDescriber)
+
+	TypeDescriber
+}
+
 type Object struct {
 	// properties is slice instead of map to keep order of declaration
 	properties []TypeDescriber

@@ -2,6 +2,13 @@ package types
 
 import "errors"
 
+type ArrayDescriber interface {
+	Items() TypeDescriber
+	SetItems(items TypeDescriber)
+
+	TypeDescriber
+}
+
 type Array struct {
 	items TypeDescriber
 

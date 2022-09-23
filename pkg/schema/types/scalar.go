@@ -7,6 +7,16 @@ const (
 	ScalarBooleanType = "boolean"
 )
 
+type ScalarDescriber interface {
+	Format() string
+	HasFormat() bool
+	Enum() []interface{}
+	HasEnum() bool
+	Value() interface{}
+
+	TypeDescriber
+}
+
 type Scalar struct {
 	format      string
 	typeKeyword string

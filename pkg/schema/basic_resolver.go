@@ -291,43 +291,21 @@ func (b *BasicResolver) resolveReferenceType(referenceType *types.Reference) (ty
 	// Recreate the type definition to override generic infomation
 	switch targetType := targetType.(type) {
 	case *types.Scalar:
-		return types.NewScalar(
-			referenceType.Name(),
-			referenceType.Path(),
-			getFirstNonEmptyString(referenceType.Description(), targetType.Description()),
-			targetType.Nullable(),
-			targetType.Type(),
-			targetType.Format(),
-			targetType.Enum(),
-			targetType.Value(),
-		)
+		return types.NewScalarReference(
+			referenceType,
+			targetType,
+		), nil
 	case *types.Array:
-		return types.NewArray(
-			referenceType.Name(),
-			referenceType.Path(),
-			getFirstNonEmptyString(referenceType.Description(), targetType.Description()),
-			targetType.Nullable(),
-			targetType.Items(),
-		)
+		return types.NewArrayReference(
+			referenceType,
+			targetType,
+		), nil
 	case *types.Object:
-		return types.NewObject(
-			referenceType.Name(),
-			referenceType.Path(),
-			getFirstNonEmptyString(referenceType.Description(), targetType.Description()),
-			targetType.Nullable(),
-			targetType.Properties(),
-		)
+		return types.NewObjectReference(
+			referenceType,
+			targetType,
+		), nil
 	default:
 		return nil, fmt.Errorf("type '%T' of defintion '%s' is not supported", targetType, targetType.Path())
 	}
-}
-
-func getFirstNonEmptyString(strings ...string) string {
-	for i := range strings {
-		if len(strings[i]) > 0 {
-			return strings[i]
-		}
-	}
-
-	return ""
 }
