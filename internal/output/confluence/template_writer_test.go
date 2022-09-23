@@ -122,6 +122,13 @@ types:
 
 		assertTempleWriterOutput(t, confluence.TemplateRetriverFunc(newPublishedEventsTemplateMock), schemaResolver, expected)
 	})
+
+	t.Run("assert consumed events", func(t *testing.T) {
+		// @todo: improve this assertion
+		expected := `CAKE_PURCHASED|Usado para inciar o processo de fazer o bolo|||`
+
+		assertTempleWriterOutput(t, confluence.TemplateRetriverFunc(newConsumedEventsTemplateMock), schemaResolver, expected)
+	})
 }
 
 func newTypesTemplateMock() string {
@@ -130,6 +137,10 @@ func newTypesTemplateMock() string {
 
 func newPublishedEventsTemplateMock() string {
 	return "{{range .PublishedEvents}}{{.Example}}|||{{end}}"
+}
+
+func newConsumedEventsTemplateMock() string {
+	return "{{range .ConsumedEvents}}{{.Name}}|{{.Description}}|||{{end}}"
 }
 
 func assertStringWithNewLinesAndIdentation(t *testing.T, expected, value string) {

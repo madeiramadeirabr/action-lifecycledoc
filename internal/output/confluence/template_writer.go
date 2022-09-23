@@ -47,6 +47,10 @@ func (t *TemplateWriter) Write(w io.Writer, schemaResolver schema.Resolver) erro
 		return fmt.Errorf("can't prepare published events to write: %w", err)
 	}
 
+	if err := t.prepareConsumedEvents(out, schemaResolver); err != nil {
+		return fmt.Errorf("can't prepare consumed events to write: %w", err)
+	}
+
 	template, err := template.New("events_page").Parse(t.templateRetriver.Retrive())
 	if err != nil {
 		return fmt.Errorf("can't parse output template: %w", err)
@@ -90,6 +94,22 @@ func (t *TemplateWriter) preparePublishedEvents(out *outputData, schemaResolver 
 		}
 
 		out.PublishedEvents = append(out.PublishedEvents, eventOut)
+	}
+
+	return nil
+}
+
+func (t *TemplateWriter) prepareConsumedEvents(out *outputData, schemaResolver schema.Resolver) error {
+	consumedEvents, err := schemaResolver.GetConsumedEvents()
+	if err != nil {
+		return fmt.Errorf("can't get consumed events to write: %w", err)
+	}
+
+	for i := range consumedEvents {
+		out.ConsumedEvents = append(out.ConsumedEvents, &consumedEventOutput{
+			Name:        consumedEvents[i].Name(),
+			Description: consumedEvents[i].Description(),
+		})
 	}
 
 	return nil
