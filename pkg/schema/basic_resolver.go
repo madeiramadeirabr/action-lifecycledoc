@@ -9,6 +9,8 @@ import (
 
 // BasicResolver implement a simple resolver with type reference support only. This resolver does not deal with concurrency
 type BasicResolver struct {
+	confluencePageTitlePrefix string
+
 	project *types.Project
 
 	types map[string]types.TypeDescriber
@@ -48,6 +50,10 @@ func (b *BasicResolver) SetProject(name string) error {
 	return nil
 }
 
+func (b *BasicResolver) SetConfluencePageTitlePrefix(prefix string) {
+	b.confluencePageTitlePrefix = prefix
+}
+
 func (b *BasicResolver) AddConfluencePage(title, spaceKey, ancestorID string) error {
 	if err := b.isValid(); err != nil {
 		return err
@@ -55,6 +61,10 @@ func (b *BasicResolver) AddConfluencePage(title, spaceKey, ancestorID string) er
 
 	if len(title) < 1 {
 		title = fmt.Sprintf("Life Cycle Events: %s", b.project.Name())
+	}
+
+	if len(b.confluencePageTitlePrefix) > 0 {
+		title = fmt.Sprintf("%s %s", b.confluencePageTitlePrefix, title)
 	}
 
 	page, err := types.NewConfluencePage(title, spaceKey, ancestorID)

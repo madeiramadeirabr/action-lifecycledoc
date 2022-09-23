@@ -15,6 +15,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const (
+	titlePrefixFlag = "titlePrefix"
+)
+
 func init() {
 	log.SetFlags(log.Ldate | log.Lmicroseconds)
 
@@ -31,6 +35,8 @@ func main() {
 		RunE:  process,
 	}
 
+	rootCmd.Flags().String(titlePrefixFlag, "", "Specifies a prefix for Confluence page titles")
+
 	if err := rootCmd.Execute(); err != nil {
 		log.Fatal(err)
 	}
@@ -46,6 +52,11 @@ func process(cmd *cobra.Command, args []string) error {
 
 	schameResolver := schema.NewBasicResolver()
 	decoder := yaml.NewDecoder()
+
+	titlePrefix, _ := cmd.Flags().GetString(titlePrefixFlag)
+	if len(titlePrefix) > 0 {
+		schameResolver.SetConfluencePageTitlePrefix(titlePrefix)
+	}
 
 	if err := decoder.Decode(lifecycleFile, schameResolver); err != nil {
 		return err
@@ -70,7 +81,7 @@ func process(cmd *cobra.Command, args []string) error {
 		if result.Err != nil {
 			log.Print(result.Err)
 		} else {
-			log.Printf("Generated documentation: %s%s", result.Content.Links.Base, result.Content.Links.TinyUI)
+			log.Printf("documentation generated: %s%s", result.Content.Links.Base, result.Content.Links.TinyUI)
 		}
 	}
 
