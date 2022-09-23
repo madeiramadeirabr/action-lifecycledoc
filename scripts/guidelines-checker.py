@@ -272,10 +272,9 @@ class GuidelinesChecker:
                           or os.path.isfile(tests_folder + 'jest-component.config.json') \
                           or os.path.isfile(tests_folder + 'jest-component.config.js') \
                           or os.path.isfile(tests_folder + 'jest-component.config.ts')
-        result = unit_tests and integration_tests and component_tests
 
         return {
-            "result": result,
+            "result": unit_tests,
             "contexts": [
                 {
                     "unit": unit_tests
