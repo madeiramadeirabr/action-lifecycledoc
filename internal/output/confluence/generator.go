@@ -160,6 +160,11 @@ func (g *Generator) generateContent(
 		Space: goconfluence.Space{
 			Key: page.SpaceKey(),
 		},
+		Ancestors: []goconfluence.Ancestor{
+			{
+				ID: page.AncestorID(),
+			},
+		},
 		Body: *body,
 		Version: &goconfluence.Version{
 			Number:  1,
@@ -177,12 +182,6 @@ func (g *Generator) generateContent(
 		// 		},
 		// 	},
 		// },
-	}
-
-	if page.HasAncestorID() {
-		content.Ancestors = append(content.Ancestors, goconfluence.Ancestor{
-			ID: page.AncestorID(),
-		})
 	}
 
 	return content

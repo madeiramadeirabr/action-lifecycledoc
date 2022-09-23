@@ -35,10 +35,6 @@ func (c *ConfluencePage) AncestorID() string {
 	return c.ancestorID
 }
 
-func (c *ConfluencePage) HasAncestorID() bool {
-	return len(c.AncestorID()) > 0
-}
-
 func NewConfluencePage(title, spaceKey, ancestorID string) (*ConfluencePage, error) {
 	if len(title) < 1 {
 		return nil, errors.New("title cannot be empty")
@@ -46,6 +42,10 @@ func NewConfluencePage(title, spaceKey, ancestorID string) (*ConfluencePage, err
 
 	if len(spaceKey) < 1 {
 		return nil, errors.New("space key cannot be empty")
+	}
+
+	if len(ancestorID) < 1 {
+		return nil, errors.New("ancestor id cannot be empty")
 	}
 
 	return &ConfluencePage{
