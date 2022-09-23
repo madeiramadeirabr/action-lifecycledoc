@@ -1,11 +1,15 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 
 	"github.com/madeiramadeirabr/action-lifecycledoc/internal/config"
+	"github.com/madeiramadeirabr/action-lifecycledoc/internal/output/confluence"
+	confluenceRest "github.com/madeiramadeirabr/action-lifecycledoc/pkg/client/confluence"
 	"github.com/madeiramadeirabr/action-lifecycledoc/pkg/schema"
 	"github.com/madeiramadeirabr/action-lifecycledoc/pkg/schema/parser/yaml"
 	"github.com/spf13/cobra"
@@ -47,7 +51,28 @@ func process(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	// @todo: Generate confluence page
+	generator := confluence.NewGenerator(
+		confluenceRest.NewClient(
+			http.DefaultClient,
+			config.GetConfluenceHost(),
+			config.GetConfluenceEmail(),
+			config.GetConfluenceAPIKey(),
+		),
+		confluence.NewHTMLTemplateRetriver(),
+	)
+
+	resultChan, err := generator.Generate(context.Background(), schameResolver)
+	if err != nil {
+		return err
+	}
+
+	for result := range resultChan {
+		if result.Err != nil {
+			log.Print(result.Err)
+		} else {
+			log.Printf("Generated documentation: %s%s", result.Content.Links.Base, result.Content.Links.TinyUI)
+		}
+	}
 
 	return nil
 }

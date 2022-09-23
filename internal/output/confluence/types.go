@@ -18,7 +18,7 @@ type typeOutput struct {
 	Example     string
 }
 
-func (t *typeOutput) ExampleMultipleLine() bool {
+func (t *typeOutput) ExampleIsMultipleLine() bool {
 	return strings.Contains(t.Example, string('\n'))
 }
 
