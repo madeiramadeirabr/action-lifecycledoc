@@ -230,9 +230,10 @@ func (t *TemplateWriter) typeDescriberToExample(inRootLevel bool, typeDescriber 
 				typeModifier = fmt.Sprintf("%s[%v]", typeModifier, t.formatEnum(typeDescriber.Enum()))
 			}
 
-			if comment, require := t.createComment(typeDescriber, typeModifier); require {
-				return jsonc.NewCommentValue(comment, typeDescriber.Value()), nil
-			}
+			return jsonc.NewCommentValue(
+				t.createComment(typeDescriber, typeModifier),
+				typeDescriber.Value(),
+			), nil
 		}
 
 		return typeDescriber.Value(), nil
@@ -245,9 +246,10 @@ func (t *TemplateWriter) typeDescriberToExample(inRootLevel bool, typeDescriber 
 		result := []interface{}{items}
 
 		if !inRootLevel {
-			if comment, require := t.createComment(typeDescriber, ""); require {
-				return jsonc.NewCommentValue(comment, result), nil
-			}
+			return jsonc.NewCommentValue(
+				t.createComment(typeDescriber, ""),
+				result,
+			), nil
 		}
 
 		return result, nil
@@ -268,9 +270,10 @@ func (t *TemplateWriter) typeDescriberToExample(inRootLevel bool, typeDescriber 
 		}
 
 		if !inRootLevel {
-			if comment, require := t.createComment(typeDescriber, ""); require {
-				return jsonc.NewCommentValue(comment, result), nil
-			}
+			return jsonc.NewCommentValue(
+				t.createComment(typeDescriber, ""),
+				result,
+			), nil
 		}
 
 		return result, nil
@@ -279,7 +282,7 @@ func (t *TemplateWriter) typeDescriberToExample(inRootLevel bool, typeDescriber 
 	return nil, nil
 }
 
-func (t *TemplateWriter) createComment(typeDescriber types.TypeDescriber, typeModifier string) (string, bool) {
+func (t *TemplateWriter) createComment(typeDescriber types.TypeDescriber, typeModifier string) string {
 	var identifier, nullable, description string
 
 	refereceType, is := typeDescriber.(types.ReferenceDescriber)
@@ -298,12 +301,7 @@ func (t *TemplateWriter) createComment(typeDescriber types.TypeDescriber, typeMo
 		description = fmt.Sprintf(": %s", typeDescriber.Description())
 	}
 
-	comment := fmt.Sprintf("%s%s%s", typeModifier, nullable, description)
-	if len(comment) < 1 {
-		return "", false
-	}
-
-	return fmt.Sprintf("%s%s", identifier, comment), true
+	return fmt.Sprintf("%s%s%s%s", identifier, typeModifier, nullable, description)
 }
 
 func (t *TemplateWriter) formatEnum(enum []interface{}) string {

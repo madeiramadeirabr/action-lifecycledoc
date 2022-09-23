@@ -111,14 +111,14 @@ types:
 
 	t.Run("asset types", func(t *testing.T) {
 		// @todo: improve this assertion
-		expected := `circle|||abacaxi|||["abacaxi"]|||{"id": "12354", // string: O ID do bolo"flaviours": ["abacaxi" // CakeFlaviourEnum: Enum dos sabores possíveis do bolo], // CakeFlaviours: Nhami Nhami 😋"shape": "circle", // CakeShape: Enum dos formatos de bolo suportado"layers": 5 // integer(uint8): Quantidade de camadas do bolo}|||`
+		expected := `circle|||abacaxi|||["abacaxi" // CakeFlaviourEnum: Enum dos sabores possíveis do bolo]|||{"id": "12354", // string: O ID do bolo"flaviours": ["abacaxi" // CakeFlaviourEnum: Enum dos sabores possíveis do bolo], // CakeFlaviours: Nhami Nhami 😋"shape": "circle", // CakeShape: Enum dos formatos de bolo suportado"layers": 5 // integer(uint8): Quantidade de camadas do bolo}|||`
 
 		assertTempleWriterOutput(t, confluence.TemplateRetriverFunc(newTypesTemplateMock), schemaResolver, expected)
 	})
 
 	t.Run("asset published events", func(t *testing.T) {
 		// @todo: improve this assertion
-		expected := `{"attributes": {"cake": {"id": "12354", // string: O ID do bolo"flaviours": ["abacaxi" // CakeFlaviourEnum: Enum dos sabores possíveis do bolo], // CakeFlaviours: Nhami Nhami 😋"shape": "circle", // CakeShape: Enum dos formatos de bolo suportado"layers": 5 // integer(uint8): Quantidade de camadas do bolo}, // Cake: Representa um bolo"guilty": [{"id": "41af6672-5b3a-4d5c-9be1-7c93dc1614e1", // string: ID do usuário"name": "Fulano" // string: Nome do usuário}] // array: Usuários que receberam a culpa},"entities": {"cakeId": "12354"}}|||`
+		expected := `{"attributes": {"cake": {"id": "12354", // string: O ID do bolo"flaviours": ["abacaxi" // CakeFlaviourEnum: Enum dos sabores possíveis do bolo], // CakeFlaviours: Nhami Nhami 😋"shape": "circle", // CakeShape: Enum dos formatos de bolo suportado"layers": 5 // integer(uint8): Quantidade de camadas do bolo}, // Cake: Representa um bolo"guilty": [{"id": "41af6672-5b3a-4d5c-9be1-7c93dc1614e1", // string: ID do usuário"name": "Fulano" // string: Nome do usuário} // object] // array: Usuários que receberam a culpa},"entities": {"cakeId": "12354" // string}}|||`
 
 		assertTempleWriterOutput(t, confluence.TemplateRetriverFunc(newPublishedEventsTemplateMock), schemaResolver, expected)
 	})
