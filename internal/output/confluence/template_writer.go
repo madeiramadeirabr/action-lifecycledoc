@@ -39,6 +39,27 @@ func (t *TemplateWriter) Write(w io.Writer, schemaResolver schema.Resolver) erro
 
 	out := &outputData{}
 
+	if err := t.prepareTypes(out, schemaResolver); err != nil {
+		return fmt.Errorf("can't prepare types to write: %w", err)
+	}
+
+	if err := t.preparePublishedEvents(out, schemaResolver); err != nil {
+		return fmt.Errorf("can't prepare published events to write: %w", err)
+	}
+
+	template, err := template.New("events_page").Parse(t.templateRetriver.Retrive())
+	if err != nil {
+		return fmt.Errorf("can't parse output template: %w", err)
+	}
+
+	if err := template.Execute(w, out); err != nil {
+		return fmt.Errorf("can't write output template: %w", err)
+	}
+
+	return nil
+}
+
+func (t *TemplateWriter) prepareTypes(out *outputData, schemaResolver schema.Resolver) error {
 	typesDefinitions, err := schemaResolver.GetTypes()
 	if err != nil {
 		return fmt.Errorf("can't get types to write: %w", err)
@@ -53,16 +74,76 @@ func (t *TemplateWriter) Write(w io.Writer, schemaResolver schema.Resolver) erro
 		out.Types = append(out.Types, typeOutput)
 	}
 
-	template, err := template.New("events_page").Parse(t.templateRetriver.Retrive())
+	return nil
+}
+
+func (t *TemplateWriter) preparePublishedEvents(out *outputData, schemaResolver schema.Resolver) error {
+	publishedEvents, err := schemaResolver.GetPublishedEvents()
 	if err != nil {
-		return fmt.Errorf("can't parse output template: %w", err)
+		return fmt.Errorf("can't get published events to write: %w", err)
 	}
 
-	if err := template.Execute(w, out); err != nil {
-		return fmt.Errorf("can't write output template: %w", err)
+	for i := range publishedEvents {
+		eventOut, err := t.publishedEventToOutput(publishedEvents[i])
+		if err != nil {
+			return err
+		}
+
+		out.PublishedEvents = append(out.PublishedEvents, eventOut)
 	}
 
 	return nil
+}
+
+func (t *TemplateWriter) publishedEventToOutput(event *types.PublishedEvent) (*publishedEventOutput, error) {
+	out := &publishedEventOutput{
+		Name:        event.Name(),
+		Visibility:  event.Visibility().String(),
+		Module:      event.Module(),
+		Description: event.Description(),
+	}
+
+	var (
+		eventBody jsonc.MapSlice
+		err       error
+	)
+
+	eventBody, err = t.createEventExampleMapItem(event.Name(), "attributes", event.Attributes(), eventBody)
+	if err != nil {
+		return nil, err
+	}
+
+	eventBody, err = t.createEventExampleMapItem(event.Name(), "entities", event.Entities(), eventBody)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := t.exampleEncoder.Encode(eventBody); err != nil {
+		return nil, fmt.Errorf("can't encode event '%s' example: %w", event.Name(), err)
+	}
+
+	out.Example = t.exampleWriter.String()
+	t.exampleWriter.Reset()
+
+	return out, nil
+}
+
+func (t *TemplateWriter) createEventExampleMapItem(
+	eventName, exampleKey string,
+	typeDescriber types.TypeDescriber,
+	eventBody jsonc.MapSlice,
+) (jsonc.MapSlice, error) {
+	example, err := t.typeDescriberToExample(true, typeDescriber)
+	if err != nil {
+		return eventBody, fmt.Errorf("can't create %s example of '%s' event: %w", exampleKey, eventName, err)
+	}
+
+	eventBody = append(eventBody, jsonc.MapItem{
+		Key:   exampleKey,
+		Value: example,
+	})
+
+	return eventBody, nil
 }
 
 func (t *TemplateWriter) typeDescriberToTypeOutput(typeDescriber types.TypeDescriber) (*typeOutput, error) {
