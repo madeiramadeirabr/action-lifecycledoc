@@ -123,6 +123,17 @@ func (t *TemplateWriter) publishedEventToOutput(event *types.PublishedEvent) (*p
 		Description: event.Description(),
 	}
 
+	var emojiPrefix string
+	switch event.Visibility() {
+	case types.EventPrivate:
+		emojiPrefix = "🔒 "
+	case types.EventProtected:
+		emojiPrefix = "🔐 "
+	case types.EventPublic:
+		emojiPrefix = "🔓 "
+	}
+	out.Name = fmt.Sprintf("%s%s", emojiPrefix, out.Name)
+
 	var (
 		eventBody jsonc.MapSlice
 		err       error
