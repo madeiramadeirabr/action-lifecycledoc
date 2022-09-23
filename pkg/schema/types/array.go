@@ -8,7 +8,7 @@ type Array struct {
 	generic
 }
 
-func (*Array) Type() TypeKeyword {
+func (*Array) Type() string {
 	return ArrayType
 }
 

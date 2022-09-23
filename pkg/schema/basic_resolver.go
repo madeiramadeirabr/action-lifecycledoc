@@ -231,24 +231,21 @@ func (b *BasicResolver) getResolvedType(t types.TypeDescriber) (types.TypeDescri
 }
 
 func (b *BasicResolver) resolveType(t types.TypeDescriber) (types.TypeDescriber, error) {
-	switch t.Type() {
-	case types.ReferenceType:
+	switch t := t.(type) {
+	case *types.Reference:
 		return b.resolveReferenceType(t)
-	case types.ArrayType:
+	case *types.Array:
 		return b.resolveArrayType(t)
-	case types.ObjectType:
+	case *types.Object:
 		return b.resolveObjectType(t)
+	case *types.Scalar:
+		return t, nil
+	default:
+		return nil, fmt.Errorf("unkown type '%T' of definition '%s'", t, t.Path())
 	}
-
-	return t, nil
 }
 
-func (b *BasicResolver) resolveArrayType(t types.TypeDescriber) (types.TypeDescriber, error) {
-	arrayType, is := t.(*types.Array)
-	if !is {
-		return nil, fmt.Errorf("definition '%s' is not of array type", t.Path())
-	}
-
+func (b *BasicResolver) resolveArrayType(arrayType *types.Array) (types.TypeDescriber, error) {
 	itemsType, err := b.getResolvedType(arrayType.Items())
 	if err != nil {
 		return nil, fmt.Errorf("can't resolve items from '%s': %w", arrayType.Path(), err)
@@ -258,12 +255,7 @@ func (b *BasicResolver) resolveArrayType(t types.TypeDescriber) (types.TypeDescr
 	return arrayType, nil
 }
 
-func (b *BasicResolver) resolveObjectType(t types.TypeDescriber) (types.TypeDescriber, error) {
-	objectType, is := t.(*types.Object)
-	if !is {
-		return nil, fmt.Errorf("definition '%s' is not of object type", t.Path())
-	}
-
+func (b *BasicResolver) resolveObjectType(objectType *types.Object) (types.TypeDescriber, error) {
 	properties := objectType.Properties()
 	for i := range properties {
 		propertyType, err := b.getResolvedType(properties[i])
@@ -278,12 +270,7 @@ func (b *BasicResolver) resolveObjectType(t types.TypeDescriber) (types.TypeDesc
 	return objectType, nil
 }
 
-func (b *BasicResolver) resolveReferenceType(t types.TypeDescriber) (types.TypeDescriber, error) {
-	referenceType, err := typeDescriberToRealType[*types.Reference](t)
-	if err != nil {
-		return nil, err
-	}
-
+func (b *BasicResolver) resolveReferenceType(referenceType *types.Reference) (types.TypeDescriber, error) {
 	targetType, exists := b.types[referenceType.Reference()]
 	if !exists {
 		return nil, fmt.Errorf("definition '%s' referenced in '%s' not found in declared types", referenceType.Reference(), referenceType.Path())
@@ -294,7 +281,7 @@ func (b *BasicResolver) resolveReferenceType(t types.TypeDescriber) (types.TypeD
 	}
 	b.resolvingTypes[referenceType.Path()] = true
 
-	targetType, err = b.getResolvedType(targetType)
+	targetType, err := b.getResolvedType(targetType)
 	if err != nil {
 		return nil, fmt.Errorf("can't resolve '%s' reference: %w", referenceType.Path(), err)
 	}
@@ -302,50 +289,36 @@ func (b *BasicResolver) resolveReferenceType(t types.TypeDescriber) (types.TypeD
 	delete(b.resolvingTypes, referenceType.Path())
 
 	// Recreate the type definition to override generic infomation
-	switch targetType.Type() {
-	case types.ScalarType:
-		scalarType, err := typeDescriberToRealType[*types.Scalar](targetType)
-		if err != nil {
-			return nil, err
-		}
-
+	switch targetType := targetType.(type) {
+	case *types.Scalar:
 		return types.NewScalar(
 			referenceType.Name(),
 			referenceType.Path(),
-			getFirstNonEmptyString(referenceType.Description(), scalarType.Description()),
-			scalarType.Nullable(),
-			scalarType.Format(),
-			scalarType.Enum(),
-			scalarType.Value(),
+			getFirstNonEmptyString(referenceType.Description(), targetType.Description()),
+			targetType.Nullable(),
+			targetType.Type(),
+			targetType.Format(),
+			targetType.Enum(),
+			targetType.Value(),
 		)
-	case types.ArrayType:
-		arrayType, err := typeDescriberToRealType[*types.Array](targetType)
-		if err != nil {
-			return nil, err
-		}
-
+	case *types.Array:
 		return types.NewArray(
 			referenceType.Name(),
 			referenceType.Path(),
-			getFirstNonEmptyString(referenceType.Description(), arrayType.Description()),
-			arrayType.Nullable(),
-			arrayType.Items(),
+			getFirstNonEmptyString(referenceType.Description(), targetType.Description()),
+			targetType.Nullable(),
+			targetType.Items(),
 		)
-	case types.ObjectType:
-		objectType, err := typeDescriberToRealType[*types.Object](targetType)
-		if err != nil {
-			return nil, err
-		}
-
+	case *types.Object:
 		return types.NewObject(
 			referenceType.Name(),
 			referenceType.Path(),
-			getFirstNonEmptyString(referenceType.Description(), objectType.Description()),
-			objectType.Nullable(),
-			objectType.Properties(),
+			getFirstNonEmptyString(referenceType.Description(), targetType.Description()),
+			targetType.Nullable(),
+			targetType.Properties(),
 		)
 	default:
-		return nil, fmt.Errorf("type '%s' of defintion '%s' is not supported", targetType.Type(), targetType.Path())
+		return nil, fmt.Errorf("type '%T' of defintion '%s' is not supported", targetType, targetType.Path())
 	}
 }
 
@@ -357,17 +330,4 @@ func getFirstNonEmptyString(strings ...string) string {
 	}
 
 	return ""
-}
-
-type typeDescriberRealTypes interface {
-	*types.Scalar | *types.Reference | *types.Array | *types.Object
-}
-
-func typeDescriberToRealType[T typeDescriberRealTypes](t types.TypeDescriber) (T, error) {
-	result, is := t.(T)
-	if !is {
-		return nil, fmt.Errorf("definition '%s' is not of '%T' type", t.Path(), result)
-	}
-
-	return result, nil
 }

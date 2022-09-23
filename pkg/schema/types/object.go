@@ -9,7 +9,7 @@ type Object struct {
 	generic
 }
 
-func (*Object) Type() TypeKeyword {
+func (*Object) Type() string {
 	return ObjectType
 }
 

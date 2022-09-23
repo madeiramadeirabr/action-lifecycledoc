@@ -1,15 +1,23 @@
 package types
 
+const (
+	ScalarIntegerType = "integer"
+	ScalarNumberType  = "number"
+	ScalarStringType  = "string"
+	ScalarBooleanType = "boolean"
+)
+
 type Scalar struct {
-	format string
-	enum   []interface{}
-	value  interface{}
+	format      string
+	typeKeyword string
+	enum        []interface{}
+	value       interface{}
 
 	generic
 }
 
-func (*Scalar) Type() TypeKeyword {
-	return ScalarType
+func (s *Scalar) Type() string {
+	return s.typeKeyword
 }
 
 // Format returns the real definition type format. Can return empty
@@ -17,9 +25,17 @@ func (s *Scalar) Format() string {
 	return s.format
 }
 
+func (s *Scalar) HasFormat() bool {
+	return len(s.Format()) > 0
+}
+
 // Enum returns all possible values. Can return empty
 func (s *Scalar) Enum() []interface{} {
 	return s.enum
+}
+
+func (s *Scalar) HasEnum() bool {
+	return len(s.Enum()) > 0
 }
 
 func (s *Scalar) Value() interface{} {
@@ -29,7 +45,7 @@ func (s *Scalar) Value() interface{} {
 func NewScalar(
 	name, path, description string,
 	nullable bool,
-	format string,
+	typeKeyword, format string,
 	enum []interface{},
 	value interface{},
 ) (*Scalar, error) {
@@ -39,9 +55,10 @@ func NewScalar(
 	}
 
 	return &Scalar{
-		generic: *base,
-		format:  format,
-		enum:    enum,
-		value:   value,
+		generic:     *base,
+		typeKeyword: typeKeyword,
+		format:      format,
+		enum:        enum,
+		value:       value,
 	}, nil
 }

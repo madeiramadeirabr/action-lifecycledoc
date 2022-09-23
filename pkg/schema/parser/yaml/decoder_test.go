@@ -104,25 +104,25 @@ types:
 
 	testCases := map[string]testCase{
 		"#/types/BoolType": {
-			expectedTypeKeyword: types.ScalarType,
+			expectedTypeKeyword: types.ScalarBooleanType,
 			expectedDescription: "Uma boolean",
 			expectedNullable:    true,
 			typeAssertions:      newScalarAssertion(t, "", nil, nil),
 		},
 		"#/types/IntType": {
-			expectedTypeKeyword: types.ScalarType,
+			expectedTypeKeyword: types.ScalarIntegerType,
 			expectedDescription: "Um int",
 			expectedNullable:    false,
 			typeAssertions:      newScalarAssertion(t, "", nil, 10),
 		},
 		"#/types/FloatType": {
-			expectedTypeKeyword: types.ScalarType,
+			expectedTypeKeyword: types.ScalarNumberType,
 			expectedDescription: "Um float",
 			expectedNullable:    false,
 			typeAssertions:      newScalarAssertion(t, `/\d+.\d{14}/`, nil, 22.12345678901234),
 		},
 		"#/types/StringType": {
-			expectedTypeKeyword: types.ScalarType,
+			expectedTypeKeyword: types.ScalarStringType,
 			expectedDescription: "Uma string",
 			expectedNullable:    false,
 			typeAssertions: newScalarAssertion(
@@ -171,13 +171,13 @@ types:
 					properties,
 					map[string]testCase{
 						"id": {
-							expectedTypeKeyword: types.ScalarType,
+							expectedTypeKeyword: types.ScalarIntegerType,
 							expectedDescription: "",
 							expectedNullable:    false,
 							typeAssertions:      newScalarAssertion(t, "", nil, 10),
 						},
 						"name": {
-							expectedTypeKeyword: types.ScalarType,
+							expectedTypeKeyword: types.ScalarStringType,
 							expectedDescription: "O nome do object",
 							expectedNullable:    true,
 							typeAssertions:      newScalarAssertion(t, "", nil, nil),
@@ -366,7 +366,7 @@ func assertScalarType(
 }
 
 type testCase struct {
-	expectedTypeKeyword types.TypeKeyword
+	expectedTypeKeyword string
 	expectedDescription string
 	expectedNullable    bool
 	typeAssertions      func(t *testing.T, typeDef types.TypeDescriber)
@@ -396,7 +396,7 @@ func assertTypes(t *testing.T, types map[string]types.TypeDescriber, testCases m
 func assertType(
 	t *testing.T,
 	typeDef types.TypeDescriber,
-	expectedTypeKeyword types.TypeKeyword,
+	expectedTypeKeyword string,
 	expectedDescription string,
 	expectedNullable bool,
 	typeAssertions func(t *testing.T, typeDef types.TypeDescriber),

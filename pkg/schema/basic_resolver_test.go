@@ -17,7 +17,7 @@ func TestShouldParseTypes(t *testing.T) {
 		{
 			name: "StringType",
 			newType: func(t *testing.T, name, path string) (types.TypeDescriber, error) {
-				return types.NewScalar(name, path, "", false, "", nil, "banana")
+				return types.NewScalar(name, path, "", false, types.ScalarStringType, "", nil, "banana")
 			},
 		},
 		{
@@ -28,6 +28,7 @@ func TestShouldParseTypes(t *testing.T) {
 					"#/types/IntType",
 					"",
 					true,
+					types.ScalarIntegerType,
 					"",
 					nil,
 					nil,
@@ -53,6 +54,7 @@ func TestShouldParseTypes(t *testing.T) {
 					"#/types/BoolType",
 					"",
 					false,
+					types.ScalarStringType,
 					"Sim",
 					nil,
 					true,
@@ -107,6 +109,7 @@ func TestShouldResolveTypeReferences(t *testing.T) {
 		"#/types/StringType",
 		"Description of string",
 		false,
+		types.ScalarStringType,
 		"",
 		[]interface{}{
 			"option1",
@@ -142,6 +145,7 @@ func TestShouldResolveTypeReferences(t *testing.T) {
 		"#/types/ObjectType/properties/id",
 		"Description of ID type",
 		false,
+		types.ScalarStringType,
 		"",
 		nil,
 		"123456",
@@ -218,6 +222,7 @@ func TestShouldRegisterEvent(t *testing.T) {
 		"#/types/ObjectType/id",
 		"",
 		false,
+		types.ScalarIntegerType,
 		"",
 		nil,
 		10,
@@ -250,6 +255,7 @@ func TestShouldRegisterEvent(t *testing.T) {
 		"#/events/published/SIMPLE_EVENT/entities/id",
 		"",
 		false,
+		types.ScalarStringType,
 		"",
 		nil,
 		"banana",

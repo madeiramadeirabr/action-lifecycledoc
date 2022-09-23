@@ -8,7 +8,7 @@ type Reference struct {
 	generic
 }
 
-func (*Reference) Type() TypeKeyword {
+func (*Reference) Type() string {
 	return ReferenceType
 }
 

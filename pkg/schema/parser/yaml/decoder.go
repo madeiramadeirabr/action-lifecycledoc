@@ -257,13 +257,13 @@ func (d *decoder) parseTypeDefinition(
 
 	switch typeKeyword {
 	case "integer":
-		return parseScalarType[int](name, path, description, nullable, typeDefinition)
+		return parseScalarType[int](name, path, description, typeKeyword, nullable, typeDefinition)
 	case "number":
-		return parseScalarType[float64](name, path, description, nullable, typeDefinition)
+		return parseScalarType[float64](name, path, description, typeKeyword, nullable, typeDefinition)
 	case "string":
-		return parseScalarType[string](name, path, description, nullable, typeDefinition)
+		return parseScalarType[string](name, path, description, typeKeyword, nullable, typeDefinition)
 	case "boolean":
-		return parseScalarType[bool](name, path, description, nullable, typeDefinition)
+		return parseScalarType[bool](name, path, description, typeKeyword, nullable, typeDefinition)
 	case "array":
 		rawItems, err := d.extractYamlMapSliceFromMap(path, "items", typeDefinition)
 		if err != nil {
@@ -324,7 +324,7 @@ func addPathToError(path string, err error) error {
 }
 
 func parseScalarType[T scalar](
-	name, path, description string,
+	name, path, description, typeKeyword string,
 	nullable bool,
 	typeDefinition map[string]interface{},
 ) (types.TypeDescriber, error) {
@@ -353,6 +353,7 @@ func parseScalarType[T scalar](
 		path,
 		description,
 		nullable,
+		typeKeyword,
 		format,
 		enumValues,
 		rawValue,

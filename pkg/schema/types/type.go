@@ -1,13 +1,10 @@
 package types
 
 const (
-	ScalarType    TypeKeyword = "scalar"
-	ReferenceType TypeKeyword = "reference"
-	ObjectType    TypeKeyword = "object"
-	ArrayType     TypeKeyword = "array"
+	ReferenceType string = "reference"
+	ObjectType    string = "object"
+	ArrayType     string = "array"
 )
-
-type TypeKeyword string
 
 type TypeDescriber interface {
 	// Name of definition
@@ -17,7 +14,7 @@ type TypeDescriber interface {
 	Path() string
 
 	// Type of definition
-	Type() TypeKeyword
+	Type() string
 
 	// Description of definition
 	Description() string
