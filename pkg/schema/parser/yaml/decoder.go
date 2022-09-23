@@ -252,7 +252,7 @@ func (d *decoder) parseTypeDefinition(
 
 	typeKeyword, isTypeKeywordValid := typeDefinition["type"].(string)
 	if !isTypeKeywordValid {
-		return nil, fmt.Errorf("%s: invalid type declaration", path)
+		return nil, fmt.Errorf("%s/type: invalid type identifier declaration", path)
 	}
 
 	switch typeKeyword {
