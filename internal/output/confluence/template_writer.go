@@ -226,7 +226,7 @@ func (t *TemplateWriter) typeDescriberToExample(inRootLevel bool, typeDescriber 
 
 		return typeDescriber.Value(), nil
 	case types.ArrayDescriber:
-		items, err := t.typeDescriberToExample(inRootLevel, typeDescriber.Items())
+		items, err := t.typeDescriberToExample(false, typeDescriber.Items())
 		if err != nil {
 			return nil, err
 		}
