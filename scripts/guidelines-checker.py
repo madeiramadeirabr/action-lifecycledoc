@@ -107,16 +107,16 @@ class GuidelinesChecker:
         "github-templates": {"callback": "has_github_templates", "required": True},
         "github-actions": {"callback": "has_github_actions", "required": True},
         "github-docs": {"callback": "has_github_docs", "required": True},
-        "sonar": {"callback": "has_sonar", "required": True},
-        "sonar-action": {"callback": "has_sonar_action", "required": True},
+        "sonar": {"callback": "has_sonar", "required": False},
+        "sonar-action": {"callback": "has_sonar_action", "required": False},
         "openapi": {"callback": "has_openapi", "required": False},
         "restful": {"callback": "has_restful", "required": False},
-        "docker": {"callback": "has_docker", "required": True},
+        "docker": {"callback": "has_docker", "required": False},
         "editorconfig": {"callback": "has_editorconfig", "required": True},
         "serverless": {"callback": "has_serverless", "required": False},
         "logs-monitoring": {"callback": "has_logs_monitoring", "required": False},
         "scripts": {"callback": "has_scripts", "required": True},
-        "environment-scripts": {"callback": "has_environment_scripts", "required": True},
+        "environment-scripts": {"callback": "has_environment_scripts", "required": False},
         "terraform": {"callback": "has_terraform", "required": False},
         "tests": {"callback": "has_tests", "required": True},
         "aws-ci-cd": {"callback": "has_aws_ci_cd", "required": False},
@@ -272,10 +272,9 @@ class GuidelinesChecker:
                           or os.path.isfile(tests_folder + 'jest-component.config.json') \
                           or os.path.isfile(tests_folder + 'jest-component.config.js') \
                           or os.path.isfile(tests_folder + 'jest-component.config.ts')
-        result = unit_tests and integration_tests and component_tests
 
         return {
-            "result": result,
+            "result": unit_tests,
             "contexts": [
                 {
                     "unit": unit_tests

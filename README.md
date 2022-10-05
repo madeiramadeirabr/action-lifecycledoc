@@ -2,7 +2,7 @@
 
 ## Descrição 
 
-Utilitário para exportar a definição do lifecycledoc versionada no projeto como páginadas do Confluence.
+Utilitário para exportar documentação de eventos descritos em YAML como páginas do Confluence.
 
 ## Contexto de negócio
 
@@ -14,18 +14,25 @@ partnertools
 
 ## Get started
 
-Para rodar o script você precisa configurar suas credenciais do confluence em `~/.lifecycledoc/config.yaml`. Com a seguinte estrutura:
+Para executar o programa você precisa especificar seu Personal Access Token (PAT) do Confluence no `~/.lifecycledoc/config.yaml`. Ao executar esse utilitário pela primeira vez o mesmo criará esse arquivo em sua pasta do usuário com a seguinte estrutura:
 
-```
+```yaml
 confluence_api_key: <TOKEN>
 confluence_email: <SEU EMAIL>
 confluence_host: https://madeiramadeira.atlassian.net
 ```
 
-Para roda o script segue o exemplo a baixo:
+Para exportar a documentação dos eventos para o confluence basta executar o binário do programa passando o path do YAML dos eventos:
 ```
-.lifecycledoc <path do openapi>
+lifecycledoc /some/path/lifecycle.yaml
 ```
+
+As demais opções do utilitário podem ser recuperados especificando a flag `-h` durante a execução do comando:
+```
+lifecycledoc -h
+```
+
+A especificação da sintaxe do YAML dos eventos pode ser na seguinte [página](pkg/schema/parser/yaml)
 
 ## Exit codes
 
@@ -39,4 +46,4 @@ Para roda o script segue o exemplo a baixo:
 
 ## Padrão de commmits
 
-Resuma de forma sucinta o que foi adicionado, removido ou refatorado
+Esse projeto utiliza o padrão [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/).

@@ -1,0 +1,167 @@
+<h1>Eventos publicados</h1>
+<p />
+
+{{range .PublishedEvents}}
+<p><strong>{{.Name}}</strong></p>
+<ac:structured-macro ac:name="expand" ac:schema-version="1">
+    <ac:parameter ac:name="title">{{.Description}}</ac:parameter>
+    <ac:rich-text-body>
+        <p><strong>Module</strong>: {{.Module}}<br /><strong>Visibility</strong>: {{.Visibility}}</p>
+        <ac:structured-macro ac:name="code" ac:schema-version="1">
+            <ac:parameter ac:name="language">typescript</ac:parameter>
+            <ac:plain-text-body>
+                <![CDATA[{{.Example}}]]>
+            </ac:plain-text-body>
+        </ac:structured-macro>
+    </ac:rich-text-body>
+</ac:structured-macro>
+{{end}}
+
+<h1>Eventos consumidos</h1>
+<p />
+
+{{range .ConsumedEvents}}
+<p><strong>{{.Name}}</strong></p>
+<blockquote>
+    <p>{{.Description}}</p>
+</blockquote>
+{{end}}
+
+<h1>Legendas</h1>
+<h2>Visibility</h2>
+<p>Abaixo estão as legendas das visibilidade dos eventos</p>
+<table data-layout="default">
+    <colgroup>
+        <col style="width: 180.0px;" />
+        <col style="width: 580.0px;" />
+    </colgroup>
+    <tbody>
+        <tr>
+            <td data-highlight-colour="#434343">
+                <p style="text-align: center;"><strong><span style="color:
+                            rgb(255,255,255);">Visibility</span></strong></p>
+            </td>
+            <td data-highlight-colour="#434343">
+                <p style="text-align: center;"><strong><span style="color:
+                            rgb(255,255,255);">Description</span></strong></p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <p>🔒 <strong>private</strong></p>
+            </td>
+            <td>
+                <p>Eventos destinados ao uso interno do próprio sistema. Eventos com essa visibilidade não devem ser por outros sistemas</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <p>🔐 <strong>protected</strong></p>
+            </td>
+            <td>
+                <p>Eventos destinados ao uso de outros sistemas da Squad/Grupo. Eventos com essa visibilidade não devem ser usados por outras Squad/Grupos</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <p>🔓  <strong>public</strong></p>
+            </td>
+            <td>
+                <p>Eventos com possível interesse de outras áreas da empresa</p>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<h2>Types</h2>
+<p>Abaixo estão as legendas dos tipos de dados usados nos eventos</p>
+<table data-layout="default">
+    <colgroup>
+        <col style="width: 130.0px;" />
+        <col style="width: 90.0px;" />
+        <col style="width: 400.0px;" />
+    </colgroup>
+    <tbody>
+        <tr>
+            <th data-highlight-colour="#434343">
+                <p><strong><span style="color: rgb(255,255,255);">Type</span></strong></p>
+            </th>
+            <th data-highlight-colour="#434343">
+                <p><strong><span style="color: rgb(255,255,255);">Description</span></strong></p>
+            </th>
+            <th data-highlight-colour="#434343">
+                <p />
+            </th>
+        </tr>
+        {{range .Types}}
+        <tr>
+            <td rowspan="{{.TotalAttributes}}">
+                <p><strong>{{.Name}}</strong></p>
+            </td>
+            {{- if .Description -}}
+                <td colspan="2">
+                    <p>{{- .Description -}}</p>
+                </td>
+            {{- end -}}
+        </tr>
+        <tr>
+            <td>
+                <p>Tipo</p>
+            </td>
+            <td>
+                <p><code>{{.Type}}</code></p>
+            </td>
+        </tr>
+        {{- if .Nullable -}}
+        <tr>
+            <td colspan=""2"">Pode ser nulo</td>
+        </tr>
+        {{- end -}}
+        {{- if .Format -}}
+        <tr>
+            <td>
+                <p>Formato</p>
+            </td>
+            <td>
+                <p><code>{{- .Format -}}</code></p>
+            </td>
+        </tr>
+        {{- end -}}
+        {{- if .Enum -}}
+        <tr>
+            <td>
+                <p>Enum</p>
+            </td>
+            <td>
+                <p>
+                    {{- range .Enum -}}
+                    <code>{{- .Value -}}</code>{{- if .HasMore}},{{- end -}}
+                    {{- end -}}
+                </p>
+            </td>
+        </tr>
+        {{- end -}}
+        {{- if .Example -}}
+        <tr>
+            <td>
+                <p>Exemplo</p>
+            </td>
+            <td>
+                <p>
+                    {{- if .ExampleIsMultipleLine -}}
+                    <ac:structured-macro ac:name="code" ac:schema-version="1">
+                        <ac:parameter ac:name="language">typescript</ac:parameter>
+                        <ac:plain-text-body>
+                            <![CDATA[{{.Example}}]]>
+                        </ac:plain-text-body>
+                    </ac:structured-macro>
+                    {{- else -}}
+                    <code>{{.Example}}</code>
+                    {{- end -}}
+                </p>
+            </td>
+        </tr>
+        {{- end -}}
+        {{- end -}}
+    </tbody>
+</table>
