@@ -14,6 +14,8 @@ partnertools
 
 ## Get started
 
+### CLI
+
 Para executar o programa você precisa especificar seu Personal Access Token (PAT) do Confluence no `~/.lifecycledoc/config.yaml`. Ao executar esse utilitário pela primeira vez o mesmo criará esse arquivo em sua pasta do usuário com a seguinte estrutura:
 
 ```yaml
@@ -33,6 +35,16 @@ lifecycledoc -h
 ```
 
 A especificação da sintaxe do YAML dos eventos pode ser na seguinte [página](pkg/schema/parser/yaml)
+
+### Integração com actions
+
+Importante lembrar que a configuração feita para rodar em CLI deve ser feita para as actions mas como environment. As envs seguem o mesmo no do `yaml` porém com o prefixo `LIFECYCLEDOC`
+
+ex:
+
+```
+LIFECYCLEDOC_CONFLUENCE_HOST=...
+```
 
 ## Exit codes
 

@@ -1,0 +1,14 @@
+name: "action-lifecycledoc"
+description: "Action that read lifecycle documentation and sync with confluence"
+
+inputs:
+  titlePrefix:
+    description: 'prefix in title page'
+    required: true
+
+runs:
+  using: composite
+  steps:
+  - run: |
+      go run main.go --titlePrefix ${{ inputs.titlePrefix }}
+    shell: bash
