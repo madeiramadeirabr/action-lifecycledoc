@@ -19,11 +19,17 @@ const (
 	titlePrefixFlag = "titlePrefix"
 )
 
+var (
+	infoLog *log.Logger
+	errLog  *log.Logger
+)
+
 func init() {
-	log.SetFlags(log.Ldate | log.Lmicroseconds)
+	infoLog = log.New(os.Stdout, "", log.Lmicroseconds)
+	errLog = log.New(os.Stderr, "", log.Lmicroseconds)
 
 	if err := config.LoadOrCreateConfigIfNotExists(); err != nil {
-		log.Fatal(err)
+		errLog.Fatal(err)
 	}
 }
 
@@ -38,7 +44,7 @@ func main() {
 	rootCmd.Flags().String(titlePrefixFlag, "", "Specifies a prefix for Confluence page titles")
 
 	if err := rootCmd.Execute(); err != nil {
-		log.Fatal(err)
+		errLog.Fatal(err)
 	}
 }
 
@@ -79,9 +85,9 @@ func process(cmd *cobra.Command, args []string) error {
 
 	for result := range resultChan {
 		if result.Err != nil {
-			log.Print(result.Err)
+			errLog.Print(result.Err)
 		} else {
-			log.Printf("documentation generated: %s%s", result.Content.Links.Base, result.Content.Links.TinyUI)
+			infoLog.Printf("documentation generated: %s%s", result.Content.Links.Base, result.Content.Links.TinyUI)
 		}
 	}
 
