@@ -12,10 +12,7 @@ const (
 	programConfigKeyConfluenceHost   = "confluence_host"
 	programConfigKeyConfluenceEmail  = "confluence_email"
 	programConfigKeyConfluenceAPIKey = "confluence_API_key"
-
-	programConfigDefaultConfluenceHost   = "https://<your-domain>.atlassian.net"
-	programConfigDefaultConfluenceEmail  = "your@email.com"
-	programConfigDefaultConfluenceAPIKey = "YOUR_API_KEY"
+	programConfigKeyNoConfigFile     = "no_config_file"
 )
 
 func LoadOrCreateConfigIfNotExists() error {
@@ -24,9 +21,10 @@ func LoadOrCreateConfigIfNotExists() error {
 		return err
 	}
 
-	viper.SetDefault(programConfigKeyConfluenceHost, programConfigDefaultConfluenceHost)
-	viper.SetDefault(programConfigKeyConfluenceEmail, programConfigDefaultConfluenceEmail)
-	viper.SetDefault(programConfigKeyConfluenceAPIKey, programConfigDefaultConfluenceAPIKey)
+	viper.SetDefault(programConfigKeyConfluenceHost, "https://<your-domain>.atlassian.net")
+	viper.SetDefault(programConfigKeyConfluenceEmail, "your@email.com")
+	viper.SetDefault(programConfigKeyConfluenceAPIKey, "YOUR_API_KEY")
+	viper.SetDefault(programConfigKeyNoConfigFile, "0")
 
 	viper.SetConfigName("config")
 	viper.SetConfigType("yaml")
@@ -34,6 +32,10 @@ func LoadOrCreateConfigIfNotExists() error {
 
 	viper.SetEnvPrefix("LIFECYCLEDOC")
 	viper.AutomaticEnv()
+
+	if GetNoConfigFile() == "1" {
+		return nil
+	}
 
 	if err := viper.ReadInConfig(); err != nil {
 		if _, is := err.(viper.ConfigFileNotFoundError); is {
@@ -60,6 +62,10 @@ func GetConfluenceEmail() string {
 
 func GetConfluenceAPIKey() string {
 	return viper.GetString(programConfigKeyConfluenceAPIKey)
+}
+
+func GetNoConfigFile() string {
+	return viper.GetString(programConfigKeyNoConfigFile)
 }
 
 func createProgramConfigDirIfNotExists() (string, error) {
