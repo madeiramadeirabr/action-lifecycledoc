@@ -152,7 +152,11 @@ func (g *githubSuccessResultWriter) AddResult(content *goconfluence.Content) {
 	g.links = append(g.links, fmt.Sprintf("%s%s", content.Links.Base, content.Links.TinyUI))
 }
 
+// Output write Confluence page links in GitHub output format
+// https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#setting-an-output-parameter
 func (g *githubSuccessResultWriter) Output() error {
+	fmt.Print("links=")
+
 	if err := json.NewEncoder(os.Stdout).Encode(g.links); err != nil {
 		return fmt.Errorf("can't write links json: %w", err)
 	}
