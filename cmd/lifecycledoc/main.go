@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -13,17 +14,23 @@ import (
 	"github.com/madeiramadeirabr/action-lifecycledoc/pkg/schema"
 	"github.com/madeiramadeirabr/action-lifecycledoc/pkg/schema/parser/yaml"
 	"github.com/spf13/cobra"
+	goconfluence "github.com/virtomize/confluence-go-api"
 )
 
 const (
-	titlePrefixFlag = "titlePrefix"
+	titlePrefixFlag  = "titlePrefix"
+	outputFormatFlag = "outputFormat"
+)
+
+var (
+	errLog *log.Logger
 )
 
 func init() {
-	log.SetFlags(log.Ldate | log.Lmicroseconds)
+	errLog = log.New(os.Stderr, "", log.Lmicroseconds)
 
 	if err := config.LoadOrCreateConfigIfNotExists(); err != nil {
-		log.Fatal(err)
+		errLog.Fatal(err)
 	}
 }
 
@@ -36,13 +43,25 @@ func main() {
 	}
 
 	rootCmd.Flags().String(titlePrefixFlag, "", "Specifies a prefix for Confluence page titles")
+	rootCmd.Flags().String(outputFormatFlag, "cli", "Specifies the output format. Supported formats: cli, github-action")
 
 	if err := rootCmd.Execute(); err != nil {
-		log.Fatal(err)
+		errLog.Fatal(err)
 	}
 }
 
 func process(cmd *cobra.Command, args []string) error {
+	var successWriter successResultWriter
+
+	switch format, _ := cmd.Flags().GetString(outputFormatFlag); format {
+	case "cli":
+		successWriter = newCLISuccessResultWriter()
+	case "github-action":
+		successWriter = &githubSuccessResultWriter{}
+	default:
+		return fmt.Errorf("output format '%s' unknown", format)
+	}
+
 	lifecycleFile, err := os.Open(args[0])
 	if err != nil {
 		return fmt.Errorf("can't open lifecycle YAML file '%s': %w", args[0], err)
@@ -77,12 +96,69 @@ func process(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	var lastErr error
+
 	for result := range resultChan {
 		if result.Err != nil {
-			log.Print(result.Err)
+			if lastErr != nil {
+				lastErr = fmt.Errorf("%s\n\t - %s", lastErr, result.Err)
+			} else {
+				lastErr = fmt.Errorf("\n\t - %s", result.Err)
+			}
 		} else {
-			log.Printf("documentation generated: %s%s", result.Content.Links.Base, result.Content.Links.TinyUI)
+			successWriter.AddResult(result.Content)
 		}
+	}
+
+	if lastErr != nil {
+		return fmt.Errorf("the following errors occur when creating documentation pages: %s", lastErr)
+	}
+
+	if err := successWriter.Output(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+type successResultWriter interface {
+	AddResult(content *goconfluence.Content)
+	Output() error
+}
+
+type cliSuccessResultWriter struct {
+	logger *log.Logger
+}
+
+func (c *cliSuccessResultWriter) AddResult(content *goconfluence.Content) {
+	c.logger.Printf("documentation generated: %s%s", content.Links.Base, content.Links.TinyUI)
+}
+
+func (*cliSuccessResultWriter) Output() error {
+	return nil
+}
+
+func newCLISuccessResultWriter() *cliSuccessResultWriter {
+	return &cliSuccessResultWriter{
+		logger: log.New(os.Stdout, "", log.Lmicroseconds),
+	}
+}
+
+type githubSuccessResultWriter struct {
+	links []string
+}
+
+func (g *githubSuccessResultWriter) AddResult(content *goconfluence.Content) {
+	g.links = append(g.links, fmt.Sprintf("%s%s", content.Links.Base, content.Links.TinyUI))
+}
+
+// Output write Confluence page links in GitHub output format
+// https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#setting-an-output-parameter
+func (g *githubSuccessResultWriter) Output() error {
+	fmt.Print("links=")
+
+	if err := json.NewEncoder(os.Stdout).Encode(g.links); err != nil {
+		return fmt.Errorf("can't write links json: %w", err)
 	}
 
 	return nil
