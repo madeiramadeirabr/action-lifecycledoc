@@ -1,0 +1,32 @@
+name: 'Lifecycledoc'
+description: 'Generates application Lifecycle event documentation in Confluence'
+inputs:
+  confluence-host:
+    description: 'Specifies your Confluence host'
+    required: true
+  confluence-email:
+    description: 'Specifies the Confluence user's email'
+    required: true
+  confluence-api-key:
+    description: 'Specifies the Confluence user's Personal Access Tokens (PAT)'
+    required: true
+  lifecycle-file:
+    description: 'The path of the yaml file that defines the application's events'
+    required: true
+  title-prefix:
+    description: 'Specifies a prefix to be added to each generated page'
+    default: ''
+outputs:
+  links:
+    description: 'Confluence links separated between lines'
+runs:
+  using: 'docker'
+  image: 'docker/Dockerfile'
+  env:
+    LIFECYCLEDOC_NO_CONFIG_FILE: 1
+    LIFECYCLEDOC_CONFLUENCE_HOST: ${{ inputs.confluence-host }}
+    LIFECYCLEDOC_CONFLUENCE_EMAIL: ${{ inputs.confluence-email }}
+    LIFECYCLEDOC_CONFLUENCE_API_KEY: ${{ inputs.confluence-api-key }}
+  args:
+    - ${{ inputs.title-prefix }}
+    - ${{ inputs.lifecycle-file }}
