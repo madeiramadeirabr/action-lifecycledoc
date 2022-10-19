@@ -5,13 +5,13 @@ inputs:
     description: 'Specifies your Confluence host'
     required: true
   confluence-email:
-    description: 'Specifies the Confluence user's email'
+    description: "Specifies the Confluence user's email"
     required: true
   confluence-api-key:
-    description: 'Specifies the Confluence user's Personal Access Tokens (PAT)'
+    description: "Specifies the Confluence user's Personal Access Tokens (PAT)"
     required: true
   lifecycle-file:
-    description: 'The path of the yaml file that defines the application's events'
+    description: "The path of the yaml file that defines the application's events"
     required: true
   title-prefix:
     description: 'Specifies a prefix to be added to each generated page'
