@@ -5,7 +5,8 @@ metadata:
   annotations:
     github.com/project-slug: madeiramadeirabr/action-lifecycledoc
   tags:
-    - python
+    - go
+    - libary
 spec:
   type: service
   lifecycle: production
