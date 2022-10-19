@@ -1,0 +1,14 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: action-lifecycledoc
+  annotations:
+    github.com/project-slug: madeiramadeirabr/action-lifecycledoc
+  tags:
+    - go
+    - github-action
+spec:
+  type: service
+  lifecycle: production
+  owner: squad-partner-tools
+  
