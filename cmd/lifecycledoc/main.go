@@ -81,12 +81,20 @@ func process(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	basicAuth := config.GetConfluenceBasicAuth()
+
+	if len(basicAuth) < 1 {
+		basicAuth = confluenceRest.GenerateBasicAuthorization(
+			config.GetConfluenceEmail(),
+			config.GetConfluenceAPIKey(),
+		)
+	}
+
 	generator := confluence.NewGenerator(
 		confluenceRest.NewClient(
 			http.DefaultClient,
 			config.GetConfluenceHost(),
-			config.GetConfluenceEmail(),
-			config.GetConfluenceAPIKey(),
+			basicAuth,
 		),
 		confluence.NewHTMLTemplateRetriver(),
 	)
