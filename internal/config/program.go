@@ -9,10 +9,11 @@ import (
 )
 
 const (
-	programConfigKeyConfluenceHost   = "confluence_host"
-	programConfigKeyConfluenceEmail  = "confluence_email"
-	programConfigKeyConfluenceAPIKey = "confluence_API_key"
-	programConfigKeyNoConfigFile     = "no_config_file"
+	programConfigKeyConfluenceHost      = "confluence_host"
+	programConfigKeyConfluenceEmail     = "confluence_email"
+	programConfigKeyConfluenceAPIKey    = "confluence_api_key"
+	programConfigKeyConfluenceBasicAuth = "confluence_basic_auth"
+	programConfigKeyNoConfigFile        = "no_config_file"
 )
 
 func LoadOrCreateConfigIfNotExists() error {
@@ -24,7 +25,6 @@ func LoadOrCreateConfigIfNotExists() error {
 	viper.SetDefault(programConfigKeyConfluenceHost, "https://<your-domain>.atlassian.net")
 	viper.SetDefault(programConfigKeyConfluenceEmail, "your@email.com")
 	viper.SetDefault(programConfigKeyConfluenceAPIKey, "YOUR_API_KEY")
-	viper.SetDefault(programConfigKeyNoConfigFile, "0")
 
 	viper.SetConfigName("config")
 	viper.SetConfigType("yaml")
@@ -62,6 +62,10 @@ func GetConfluenceEmail() string {
 
 func GetConfluenceAPIKey() string {
 	return viper.GetString(programConfigKeyConfluenceAPIKey)
+}
+
+func GetConfluenceBasicAuth() string {
+	return viper.GetString(programConfigKeyConfluenceBasicAuth)
 }
 
 func GetNoConfigFile() string {

@@ -28,14 +28,18 @@ type errorResponse struct {
 	Message string `json:"message"`
 }
 
-func NewClient(httpClient *http.Client, host, email, apiToken string) *Client {
+func GenerateBasicAuthorization(email, apiToken string) string {
+	return fmt.Sprintf(
+		"Basic %s",
+		base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s:%s", email, apiToken))),
+	)
+}
+
+func NewClient(httpClient *http.Client, host, authorization string) *Client {
 	return &Client{
-		httpClient: httpClient,
-		host:       fmt.Sprintf("%s/wiki/rest/api", host),
-		authorization: fmt.Sprintf(
-			"Basic %s",
-			base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s:%s", email, apiToken))),
-		),
+		httpClient:    httpClient,
+		host:          fmt.Sprintf("%s/wiki/rest/api", host),
+		authorization: authorization,
 	}
 }
 
