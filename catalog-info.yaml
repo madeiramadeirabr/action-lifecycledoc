@@ -6,7 +6,7 @@ metadata:
     github.com/project-slug: madeiramadeirabr/action-lifecycledoc
   tags:
     - go
-    - libary
+    - github-action
 spec:
   type: service
   lifecycle: production
