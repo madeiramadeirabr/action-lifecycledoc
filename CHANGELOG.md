@@ -6,9 +6,22 @@ e este projeto segue [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+---
+
+## [0.3.0] - 20-10-2022
+### Acrescentado
+- Adicionado opção `github-action-markdown` para formatar output do utilitário como markdown
+
+## Alterado
+- Alterado opção `github-action` para `github-action-json` da flag `outputFormat` para especificar melhor o seu resultado
 
 ---
 
+## [0.2.0] - 19-10-2022
+### Acrescentado
+- Adicionado configuração `confluence_basic_auth` para especificar header de authenticação do Confluence diretamente
+
+---
 
 ## [0.1.0] - 19-10-2022
 ### Acrescentado
@@ -25,5 +38,7 @@ e este projeto segue [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - API REST Client do Confluence básico (com suporte ao pacote `context`)
 - Output da documentação renderizada para o Confluence
 
-[Unreleased]: https://github.com/madeiramadeirabr/action-lifecycledoc/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/madeiramadeirabr/action-lifecycledoc/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/madeiramadeirabr/action-lifecycledoc/compare/v0.2.0...v0.3.0
+[0.2.0]: https://github.com/madeiramadeirabr/action-lifecycledoc/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/madeiramadeirabr/action-lifecycledoc/releases/tag/v0.1.0

@@ -43,7 +43,7 @@ func main() {
 	}
 
 	rootCmd.Flags().String(titlePrefixFlag, "", "Specifies a prefix for Confluence page titles")
-	rootCmd.Flags().String(outputFormatFlag, "cli", "Specifies the output format. Supported formats: cli, github-action")
+	rootCmd.Flags().String(outputFormatFlag, "cli", "Specifies the output format. Supported formats: cli, github-action-json, github-action-markdown")
 
 	if err := rootCmd.Execute(); err != nil {
 		errLog.Fatal(err)
@@ -56,8 +56,10 @@ func process(cmd *cobra.Command, args []string) error {
 	switch format, _ := cmd.Flags().GetString(outputFormatFlag); format {
 	case "cli":
 		successWriter = newCLISuccessResultWriter()
-	case "github-action":
-		successWriter = &githubSuccessResultWriter{}
+	case "github-action-json":
+		successWriter = newGithubJsonSuccessResultWriter()
+	case "github-action-markdown":
+		successWriter = newGithubMarkdownSuccessResultWriter()
 	default:
 		return fmt.Errorf("output format '%s' unknown", format)
 	}
@@ -160,9 +162,13 @@ func (g *githubSuccessResultWriter) AddResult(content *goconfluence.Content) {
 	g.links = append(g.links, fmt.Sprintf("%s%s", content.Links.Base, content.Links.TinyUI))
 }
 
+type githubJsonSuccessResultWriter struct {
+	*githubSuccessResultWriter
+}
+
 // Output write Confluence page links in GitHub output format
 // https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#setting-an-output-parameter
-func (g *githubSuccessResultWriter) Output() error {
+func (g *githubJsonSuccessResultWriter) Output() error {
 	fmt.Print("links=")
 
 	if err := json.NewEncoder(os.Stdout).Encode(g.links); err != nil {
@@ -170,4 +176,29 @@ func (g *githubSuccessResultWriter) Output() error {
 	}
 
 	return nil
+}
+
+func newGithubJsonSuccessResultWriter() *githubJsonSuccessResultWriter {
+	return &githubJsonSuccessResultWriter{
+		githubSuccessResultWriter: &githubSuccessResultWriter{},
+	}
+}
+
+type githubMarkdownSuccessResultWriter struct {
+	*githubSuccessResultWriter
+}
+
+func (g *githubMarkdownSuccessResultWriter) Output() error {
+	fmt.Print("## Updated Documentation(s)\n")
+	for i := range g.links {
+		fmt.Printf(" - %s\n", g.links[i])
+	}
+
+	return nil
+}
+
+func newGithubMarkdownSuccessResultWriter() *githubMarkdownSuccessResultWriter {
+	return &githubMarkdownSuccessResultWriter{
+		githubSuccessResultWriter: &githubSuccessResultWriter{},
+	}
 }
