@@ -64,7 +64,7 @@ Disponibilizamos uma [action](action.yaml) para executar o `lifecycledoc` no wor
     # Opcional
     title-prefix: ''
 
-    # Especifica o host do confluence destino
+    # Especifica o host do Confluence de destino
     confluence-host: https://acme-fake-company.atlassian.net
 
     # Especifica o token de autenticação do Confluence no formato Basic Auth
