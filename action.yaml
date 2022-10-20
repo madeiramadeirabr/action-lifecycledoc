@@ -16,9 +16,12 @@ inputs:
   title-prefix:
     description: 'Specifies a prefix to be added to each generated page'
     default: ''
+  output-format:
+    description: 'Specifies the output format. Supported formats: cli, github-action-json, github-action-markdown'
+    default: 'github-action-markdown'
 outputs:
   links:
-    description: 'Confluence links separated between lines'
+    description: 'Confluence links separated between lines. Filled in only when the input "output-format" is "github-action-json"'
 runs:
   using: 'docker'
   image: 'docker/Dockerfile'
@@ -29,5 +32,6 @@ runs:
     LIFECYCLEDOC_CONFLUENCE_API_KEY: ${{ inputs.confluence-api-key }}
     LIFECYCLEDOC_CONFLUENCE_BASIC_AUTH: ${{ inputs.confluence-basic-auth }}
   args:
+    - ${{ inputs.output-format }}
     - ${{ inputs.title-prefix }}
     - ${{ inputs.lifecycle-file }}
