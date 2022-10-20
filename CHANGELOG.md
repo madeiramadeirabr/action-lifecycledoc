@@ -11,7 +11,7 @@ e este projeto segue [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [1.0.0] - 20-10-2022
 ### Acrescentado
 - Adicionado GitHub Docker Container Action para permitir configurar workflows para criar/atualizar documentações de eventos
-- Adicionado geração de arquivo de somas sha256 dos binários criados no build do projeto
+- Adicionado geração de arquivo de somas `sha256` dos binários criados no build do projeto
 
 ---
 
