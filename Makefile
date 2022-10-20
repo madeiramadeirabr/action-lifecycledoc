@@ -2,7 +2,7 @@
 
 export CGO_ENABLED=0
 
-build: clear linux windows
+build: clear linux windows sha256results
 
 linux:
 	GOOS=linux GOARCH=386 go build -o build/lifecycledoc_linux_386 cmd/lifecycledoc/main.go
@@ -11,6 +11,9 @@ linux:
 windows:
 	GOOS=windows GOARCH=386 go build -o build/lifecycledoc_windows_386 cmd/lifecycledoc/main.go
 	GOOS=windows GOARCH=amd64 go build -o build/lifecycledoc_windows_amd64 cmd/lifecycledoc/main.go
+
+sha256results:
+	sha256sum build/* > build/sha256sums.txt
 
 clear:
 	rm -rf build
