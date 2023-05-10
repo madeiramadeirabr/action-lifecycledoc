@@ -84,7 +84,7 @@ Para mais detalhes ver:
 * [HTTP Methods for RESTful Services](https://www.restapitutorial.com/lessons/httpmethods.html#:~:text=The%20primary%20or%20most%2Dcommonly,but%20are%20utilized%20less%20frequently.)
 * [RESTful Web Services Resources](https://www.restapitutorial.com/resources.html)
 * [REST-API-Design-Filtering-Sorting-and-Pagination](https://www.moesif.com/blog/technical/api-design/REST-API-Design-Filtering-Sorting-and-Pagination/)
-* [HTTP Status Dogs](https://httpstatusdogs.com/)
+* [HTTP Status Dogs](https://http.dog/)
 
 ## Healthcheck
 Quando o projeto for uma API, é requerido que o mesmo implemente um endpoint de `healthcheck`, é recomendado que
